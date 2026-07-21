@@ -1,0 +1,84 @@
+
+
+
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String?
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  orders    Order[]
+}
+
+model Product {
+  id          String      @id @default(cuid())
+  name        String
+  price       Float
+  stock       Int
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  orderItems  OrderItem[]
+}
+
+model Order {
+  id                 String        @id @default(cuid())
+  
+  // Kullanıcı bilgisi opsiyonel (misafir alışverişi için)
+  userId             String?
+  user               User?         @relation(fields: [userId], references: [id])
+
+  // Misafir kullanıcılar için bilgiler
+  guestName          String?
+  guestEmail         String?
+  
+  // Adres bilgileri her sipariş için zorunlu
+  shippingAddress    String
+  billingAddress     String
+
+  // Kargo (Navlungo) entegrasyon alanları
+  navlungoShipmentId String?
+  trackingCode       String?
+
+  // Ödeme durumu
+  paymentStatus      PaymentStatus @default(PENDING)
+
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  orderItems         OrderItem[]
+}
+
+model OrderItem {
+  id             String  @id @default(cuid())
+  
+  orderId        String
+  order          Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  
+  productId      String
+  product        Product @relation(fields: [productId], references: [id])
+  
+  // Dışarıdan gelen resimlerin URL'i
+  customImageUrl String?
+  
+  quantity       Int     @default(1)
+  price          Float   // Sipariş anındaki ürün fiyatı
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
