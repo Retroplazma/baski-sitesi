@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { CheckoutPayload } from "@/lib/jwt";
 import { createOrder } from "@/actions/order.action";
+import { PRODUCTS } from "@/data/products";
 
 export default function CheckoutForm({ payload, token }: { payload: CheckoutPayload, token: string }) {
   const router = useRouter();
@@ -17,7 +18,37 @@ export default function CheckoutForm({ payload, token }: { payload: CheckoutPayl
     
     try {
       const formData = new FormData(e.currentTarget);
-      const result = await createOrder(formData, token);
+      
+      const product = PRODUCTS.find((p) => p.id === payload.productId);
+      if (!product) {
+        throw new Error("Ürün bulunamadı.");
+      }
+
+      const option = product.quantityOptions?.find(o => o.quantity === payload.quantity);
+      const itemPrice = option ? option.price / payload.quantity : (product.basePrice || 0);
+      const totalAmount = option ? option.price : (product.basePrice || 0) * payload.quantity;
+
+      const customerData = {
+        firstName: formData.get("firstName"),
+        lastName: formData.get("lastName"),
+        email: formData.get("email"),
+        phone: "0000000000", // Defaulting as form doesn't have phone
+        city: "Bilinmiyor", 
+        district: "Bilinmiyor",
+        neighborhood: "Bilinmiyor",
+        address: formData.get("shippingAddress"),
+      };
+
+      const cartItems = [{
+        productId: payload.productId,
+        name: product.name,
+        price: itemPrice,
+        quantity: payload.quantity,
+        variants: {},
+        customImage: payload.customImageUrl
+      }];
+
+      const result = await createOrder(customerData, cartItems, totalAmount);
       
       if (result.success) {
         router.push(`/payment/${result.orderId}`);

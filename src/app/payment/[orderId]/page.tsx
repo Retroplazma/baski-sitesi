@@ -7,11 +7,7 @@ export default async function PaymentPage({ params }: { params: Promise<{ orderI
   const order = await prisma.order.findUnique({
     where: { id: orderId },
     include: {
-      orderItems: {
-        include: {
-          product: true,
-        },
-      },
+      orderItems: true,
     },
   });
 
@@ -68,13 +64,13 @@ export default async function PaymentPage({ params }: { params: Promise<{ orderI
             <div className="space-y-5">
               <div>
                 <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Alıcı Bilgileri</h3>
-                <p className="text-gray-900 font-medium">{order.guestName || "Kayıtlı Kullanıcı"}</p>
-                <p className="text-gray-500 text-sm">{order.guestEmail}</p>
+                <p className="text-gray-900 font-medium">{order.firstName} {order.lastName}</p>
+                <p className="text-gray-500 text-sm">{order.email}</p>
               </div>
 
               <div>
                 <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Teslimat Adresi</h3>
-                <p className="text-gray-800 text-sm leading-relaxed">{order.shippingAddress}</p>
+                <p className="text-gray-800 text-sm leading-relaxed">{order.address}, {order.neighborhood}, {order.district}/{order.city}</p>
               </div>
             </div>
 
@@ -85,7 +81,7 @@ export default async function PaymentPage({ params }: { params: Promise<{ orderI
                   <li key={item.id} className="flex justify-between items-center text-sm">
                     <span className="text-gray-700 font-medium flex items-center gap-2">
                       <span className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-xs text-gray-500">{item.quantity}x</span>
-                      {item.product.name}
+                      {item.productName}
                     </span>
                     <span className="font-semibold text-gray-900">
                       {(item.price * item.quantity).toLocaleString("tr-TR", { style: "currency", currency: "TRY" })}

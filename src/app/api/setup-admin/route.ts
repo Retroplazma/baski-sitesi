@@ -1,5 +1,4 @@
-import { NextResponse } from "next-auth/next"; // or next/server
-import { NextRequest, NextResponse as Res } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcrypt";
 
@@ -21,8 +20,8 @@ export async function GET(req: NextRequest) {
       }
     });
 
-    return Res.json({ success: true, message: "Admin kullanıcısı başarıyla oluşturuldu/güncellendi.", user: { email: adminUser.email, role: adminUser.role } });
+    return NextResponse.json({ success: true, message: "Admin kullanıcısı başarıyla oluşturuldu/güncellendi.", user: { email: adminUser.email, role: adminUser.role } });
   } catch (error: any) {
-    return Res.json({ success: false, error: error.message }, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
