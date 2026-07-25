@@ -5,6 +5,8 @@ import Link from 'next/link';
 import HeaderCartButton from '@/components/HeaderCartButton';
 import CartDrawer from '@/components/CartDrawer';
 import CheckoutAuthModal from '@/components/CheckoutAuthModal';
+import HeaderLoginButton from '@/components/HeaderLoginButton';
+import { AuthProvider } from '@/providers/AuthProvider';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -21,7 +23,8 @@ export default function RootLayout({
   return (
     <html lang="tr">
       <body className={`${inter.className} bg-gray-50 text-gray-800 flex flex-col min-h-screen`}>
-        {/* Header */}
+        <AuthProvider>
+          {/* Header */}
         <header className="bg-white shadow-sm sticky top-0 z-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-8">
             {/* Logo */}
@@ -47,10 +50,7 @@ export default function RootLayout({
             </div>
             {/* Actions */}
             <div className="flex items-center gap-6">
-              <button className="flex flex-col items-center text-gray-600 hover:text-orange-500 transition-colors">
-                <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-                <span className="text-xs font-medium">Giriş Yap</span>
-              </button>
+              <HeaderLoginButton />
               <HeaderCartButton />
             </div>
           </div>
@@ -161,6 +161,7 @@ export default function RootLayout({
             </div>
           </div>
         </footer>
+        </AuthProvider>
       </body>
     </html>
   );

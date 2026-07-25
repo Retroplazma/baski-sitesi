@@ -1,105 +1,224 @@
-import { verifyCheckoutToken } from "@/lib/jwt";
-import CheckoutForm from "./CheckoutForm";
+"use client";
 
-export default function CheckoutPage({
-  searchParams,
-}: {
-  searchParams: { [key: string]: string | string[] | undefined };
-}) {
-  const token = searchParams.token as string;
-  const payload = token ? verifyCheckoutToken(token) : null;
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { useCartStore } from "@/store/cartStore";
+import { initializeCheckout } from "@/actions/payment.action";
+import { createOrder } from "@/actions/order.action";
+import { PRODUCTS } from "@/data/products";
+import { useRouter } from "next/navigation";
 
-  if (!payload) {
+const checkoutSchema = z.object({
+  firstName: z.string().min(2, "Ad en az 2 karakter olmalıdır"),
+  lastName: z.string().min(2, "Soyad en az 2 karakter olmalıdır"),
+  email: z.string().email("Geçerli bir e-posta adresi giriniz"),
+  phone: z.string().min(10, "Geçerli bir telefon numarası giriniz"),
+  city: z.string().min(2, "İl zorunludur"),
+  district: z.string().min(2, "İlçe zorunludur"),
+  neighborhood: z.string().min(2, "Mahalle zorunludur"),
+  address: z.string().min(10, "Açık adres detaylı olmalıdır"),
+});
+
+type CheckoutFormValues = z.infer<typeof checkoutSchema>;
+
+export default function CheckoutPage() {
+  const cart = useCartStore(state => state.cart) || [];
+  const clearCart = useCartStore(state => state.clearCart);
+  const totalPrice = cart.reduce((acc, item) => acc + item.price, 0);
+  const [loading, setLoading] = useState(false);
+  const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
+  const router = useRouter();
+
+  const { register, handleSubmit, formState: { errors } } = useForm<CheckoutFormValues>({
+    resolver: zodResolver(checkoutSchema)
+  });
+
+  const onSubmit = async (data: CheckoutFormValues) => {
+    setLoading(true);
+    try {
+      // 1. Siparişi Veritabanına Kaydet
+      const orderRes = await createOrder(data, cart, totalPrice);
+      
+      if (!orderRes.success) {
+        throw new Error(orderRes.error || "Sipariş veritabanına kaydedilemedi.");
+      }
+
+      // 2. İyzico Ödeme Başlat (Simülasyon)
+      const response = await initializeCheckout({
+        customer: data,
+        cartItems: cart,
+        totalPrice: totalPrice
+      });
+      console.log("Checkout Response:", response);
+      
+      if (response.success && response.paymentPageUrl) {
+        // Normalde kullanıcı burada iyzico sayfasına yönlendirilir: window.location.href = response.paymentPageUrl
+        // Simülasyon gereği direkt başarılı kabul edip kendi success sayfamıza yönlendiriyoruz.
+        clearCart();
+        router.push(`/success?orderNumber=${orderRes.orderNumber}`);
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Ödeme başlatılırken bir hata oluştu.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (cart.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-        <div className="bg-white p-8 rounded-3xl shadow-sm border border-red-100 max-w-md w-full text-center">
-          <div className="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
-            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-          </div>
-          <h1 className="text-2xl font-semibold text-gray-900 mb-3">Geçersiz Bağlantı</h1>
-          <p className="text-gray-500">Geçersiz veya süresi dolmuş sipariş bağlantısı kullandınız. Lütfen geldiğiniz platform üzerinden tekrar deneyin.</p>
+      <div className="max-w-6xl mx-auto py-20 text-center">
+        <h1 className="text-3xl font-bold text-gray-900 mb-4">Sepetiniz Boş</h1>
+        <p className="text-gray-500">Ödeme adımına geçmek için sepetinize ürün eklemelisiniz.</p>
+        <a href="/" className="inline-block mt-6 px-6 py-3 bg-orange-500 text-white font-semibold rounded-md">Alışverişe Başla</a>
+      </div>
+    );
+  }
+
+  if (paymentUrl) {
+    return (
+      <div className="max-w-6xl mx-auto py-20 text-center">
+        <div className="w-16 h-16 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
+          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
         </div>
+        <h1 className="text-3xl font-bold text-gray-900 mb-4">İyzico Simülasyonu Başarılı</h1>
+        <p className="text-gray-500 mb-6">Ödeme formu başlatıldı. Gerçek entegrasyonda kullanıcı iyzico ödeme sayfasına yönlendirilecektir.</p>
+        <p className="text-sm font-mono bg-gray-100 p-4 rounded-md inline-block text-gray-700">Yönlendirilecek URL: {paymentUrl}</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-
-        {/* SOL (lg:col-span-8): Kişisel bilgiler ve teslimat adresi formu */}
-        <div className="lg:col-span-8 bg-white p-8 rounded-lg shadow-sm border border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-900 mb-8 border-b border-gray-100 pb-4">Güvenli Ödeme Adımları</h2>
-          <CheckoutForm payload={payload} token={token} />
-        </div>
-
-        {/* SAĞ (lg:col-span-4): Sipariş Özeti (Sepet) */}
-        <div className="lg:col-span-4">
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 sticky top-28 flex flex-col">
-            <h2 className="text-xl font-bold text-gray-900 mb-6 border-b border-gray-100 pb-4">Sipariş Özeti</h2>
-            
-            <div className="flex gap-4 items-center mb-6">
-              <div className="w-20 h-20 relative rounded-md overflow-hidden bg-gray-50 flex-shrink-0 border border-gray-200">
-                {payload.customImageUrl ? (
-                  <img
-                    src={payload.customImageUrl}
-                    alt="Ürün Görseli"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-400">
-                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                    </svg>
-                  </div>
-                )}
-              </div>
-              <div>
-                <h3 className="text-base font-medium text-gray-900 line-clamp-2">Özel Tasarım Ürün</h3>
-                <p className="text-sm text-gray-500 mt-1">{payload.quantity} Adet</p>
+    <div className="bg-gray-50 min-h-screen pb-20 pt-10">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">Ödeme Yap</h1>
+        
+        <form onSubmit={handleSubmit(onSubmit)} className="grid md:grid-cols-12 gap-8">
+          {/* SOL KOLON */}
+          <div className="md:col-span-8 space-y-8">
+            {/* İletişim Bilgileri */}
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+              <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                İletişim Bilgileri
+              </h2>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Adınız</label>
+                  <input type="text" {...register("firstName")} className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-orange-500 focus:border-orange-500 outline-none transition" />
+                  {errors.firstName && <span className="text-red-500 text-xs mt-1 block">{errors.firstName.message}</span>}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Soyadınız</label>
+                  <input type="text" {...register("lastName")} className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-orange-500 focus:border-orange-500 outline-none transition" />
+                  {errors.lastName && <span className="text-red-500 text-xs mt-1 block">{errors.lastName.message}</span>}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">E-posta Adresiniz</label>
+                  <input type="email" {...register("email")} className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-orange-500 focus:border-orange-500 outline-none transition" />
+                  {errors.email && <span className="text-red-500 text-xs mt-1 block">{errors.email.message}</span>}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Telefon Numaranız</label>
+                  <input type="tel" {...register("phone")} placeholder="05XX XXX XX XX" className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-orange-500 focus:border-orange-500 outline-none transition" />
+                  {errors.phone && <span className="text-red-500 text-xs mt-1 block">{errors.phone.message}</span>}
+                </div>
               </div>
             </div>
 
-            <div className="mt-auto border-t border-gray-100 pt-6">
-              <div className="flex items-center justify-between mb-4 text-gray-600">
-                <span>Ara Toplam</span>
-                <span className="font-medium">Hesaplanıyor</span>
-              </div>
-              <div className="flex items-center justify-between mb-8">
-                <span className="text-lg font-bold text-gray-900">Toplam</span>
-                <span className="text-3xl font-extrabold text-orange-500">Sepette</span>
-              </div>
-              
-              {/* 
-                Kullanıcı butonu sağda istedi, ancak form sol kolonda olduğu için React form state'ini
-                korumak adına formu CheckoutForm içinde submit ediyoruz. Formu dışarıdan tetiklemek için 
-                HTML5 form özelliği kullanabiliriz.
-              */}
-              <button
-                type="submit"
-                form="checkout-form"
-                className="w-full flex justify-center items-center py-4 px-4 rounded-md shadow-md text-lg font-bold text-white bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all"
-              >
-                Siparişi Tamamla
-              </button>
-
-              {/* Güvenlik Rozetleri */}
-              <div className="mt-6 flex flex-col gap-3">
-                <div className="flex items-center justify-center text-xs text-gray-500 gap-2 bg-gray-50 p-3 rounded border border-gray-100">
-                  <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
-                  256-Bit SSL ile Güvenli Ödeme
+            {/* Teslimat Adresi */}
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+              <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                Teslimat Adresi
+              </h2>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">İl</label>
+                  <input type="text" {...register("city")} className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-orange-500 focus:border-orange-500 outline-none transition" />
+                  {errors.city && <span className="text-red-500 text-xs mt-1 block">{errors.city.message}</span>}
                 </div>
-                <div className="flex items-center justify-center text-xs text-gray-500 gap-2 bg-gray-50 p-3 rounded border border-gray-100">
-                  <svg className="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" /></svg>
-                  Bilgileriniz 3D Secure ile Korunmaktadır
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">İlçe</label>
+                  <input type="text" {...register("district")} className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-orange-500 focus:border-orange-500 outline-none transition" />
+                  {errors.district && <span className="text-red-500 text-xs mt-1 block">{errors.district.message}</span>}
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Mahalle</label>
+                  <input type="text" {...register("neighborhood")} className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-orange-500 focus:border-orange-500 outline-none transition" />
+                  {errors.neighborhood && <span className="text-red-500 text-xs mt-1 block">{errors.neighborhood.message}</span>}
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Açık Adres</label>
+                  <textarea {...register("address")} rows={3} placeholder="Sokak, bina no, daire vb." className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-orange-500 focus:border-orange-500 outline-none transition"></textarea>
+                  {errors.address && <span className="text-red-500 text-xs mt-1 block">{errors.address.message}</span>}
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
+          {/* SAĞ KOLON */}
+          <div className="md:col-span-4">
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 sticky top-24">
+              <h2 className="text-xl font-bold text-gray-800 mb-6">Sipariş Özeti</h2>
+              
+              <div className="space-y-4 mb-6 max-h-64 overflow-y-auto pr-2" style={{ scrollbarWidth: 'thin' }}>
+                {cart.map((item) => {
+                  const product = PRODUCTS.find(p => p.id === item.productId);
+                  const imageSrc = item.customImage || product?.image || '/placeholder.svg';
+                  
+                  return (
+                  <div key={item.id} className="flex gap-4 items-start border-b border-gray-50 pb-4">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={imageSrc} alt={item.name} className="w-16 h-16 object-contain bg-white rounded-md border border-gray-200" />
+                    <div className="flex-1">
+                      <h4 className="text-sm font-semibold text-gray-800 line-clamp-2">{item.name}</h4>
+                      <p className="text-xs text-gray-500 mt-1">Adet: {item.quantity}</p>
+                    </div>
+                    <div className="font-bold text-sm">
+                      {item.price.toLocaleString("tr-TR", { style: "currency", currency: "TRY" })}
+                    </div>
+                  </div>
+                )})}
+              </div>
+
+              <div className="flex justify-between items-center text-lg font-bold text-gray-900 border-t border-gray-100 pt-4 mb-6">
+                <span>Toplam Tutar</span>
+                <span>{totalPrice.toLocaleString("tr-TR", { style: "currency", currency: "TRY" })}</span>
+              </div>
+
+              <button 
+                type="submit" 
+                disabled={loading}
+                className="w-full bg-[#00008F] hover:bg-blue-800 text-white font-bold py-4 px-6 rounded-md transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+              >
+                {loading ? (
+                  <span className="flex items-center gap-2">
+                    <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    İşleniyor...
+                  </span>
+                ) : (
+                  <>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                    Güvenli Ödeme Yap
+                  </>
+                )}
+              </button>
+              
+              <div className="mt-4 flex justify-center gap-2">
+                <div className="text-xs text-gray-500 flex items-center gap-1">
+                  <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                  256-bit SSL ile güvence altında
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
       </div>
     </div>
   );

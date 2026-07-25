@@ -4,6 +4,7 @@ import { useCartStore } from "@/store/cartStore";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { PRODUCTS } from "@/data/products";
 
 export default function CartDrawer() {
   const { cart, isOpen, closeCart, removeFromCart, updateQuantity, openAuthModal } = useCartStore();
@@ -68,13 +69,17 @@ export default function CartDrawer() {
               </button>
             </div>
           ) : (
-            cart.map((item) => (
+            cart.map((item) => {
+              const product = PRODUCTS.find(p => p.id === item.productId);
+              const imageSrc = item.customImage || product?.image || '/placeholder.svg';
+              
+              return (
               <div key={item.id} className="flex gap-4 p-3 bg-white border border-gray-200 rounded-lg shadow-sm">
                 
                 {/* Image */}
                 <div className="w-20 h-20 shrink-0 border border-gray-100 rounded-md overflow-hidden bg-gray-50 relative">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={item.customImage || '/placeholder.svg'} alt={item.name} className="w-full h-full object-cover" />
+                  <img src={imageSrc} alt={item.name} className="w-full h-full object-contain bg-white" />
                   {item.customImage && (
                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                       <span className="text-[10px] text-white font-bold leading-tight text-center px-1">Özel<br/>Tasarım</span>
@@ -128,7 +133,7 @@ export default function CartDrawer() {
                 </div>
 
               </div>
-            ))
+            )})
           )}
         </div>
 

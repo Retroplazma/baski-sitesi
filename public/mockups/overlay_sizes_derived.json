@@ -1,0 +1,521 @@
+{
+  "derived": {
+    "kanvas_tablo": {
+      "width_px": 597,
+      "height_px": 544,
+      "lifestyle_wh": [
+        640,
+        640
+      ],
+      "shadow_roi_wh": [
+        597,
+        544
+      ]
+    },
+    "seramik_kupa": {
+      "width_px": 170,
+      "height_px": 200,
+      "lifestyle_wh": [
+        640,
+        640
+      ],
+      "shadow_roi_wh": [
+        170,
+        200
+      ]
+    },
+    "sihirli_kupa": {
+      "width_px": 170,
+      "height_px": 200,
+      "lifestyle_wh": [
+        640,
+        640
+      ],
+      "shadow_roi_wh": [
+        170,
+        200
+      ]
+    },
+    "yapboz": {
+      "width_px": 459,
+      "height_px": 242,
+      "lifestyle_wh": [
+        640,
+        640
+      ],
+      "shadow_roi_wh": [
+        459,
+        242
+      ]
+    },
+    "bez_canta": {
+      "width_px": 212,
+      "height_px": 144,
+      "lifestyle_wh": [
+        640,
+        640
+      ],
+      "shadow_roi_wh": [
+        212,
+        144
+      ]
+    },
+    "spiralli_defter": {
+      "width_px": 387,
+      "height_px": 258,
+      "lifestyle_wh": [
+        640,
+        640
+      ],
+      "shadow_roi_wh": [
+        387,
+        258
+      ]
+    },
+    "duvar_takvimi": {
+      "width_px": 283,
+      "height_px": 216,
+      "lifestyle_wh": [
+        640,
+        640
+      ],
+      "shadow_roi_wh": [
+        283,
+        216
+      ]
+    },
+    "masa_takvimi": {
+      "width_px": 381,
+      "height_px": 268,
+      "lifestyle_wh": [
+        640,
+        640
+      ],
+      "shadow_roi_wh": [
+        381,
+        268
+      ]
+    },
+    "tebrik_karti": {
+      "width_px": 572,
+      "height_px": 290,
+      "lifestyle_wh": [
+        640,
+        640
+      ],
+      "shadow_roi_wh": [
+        572,
+        290
+      ]
+    },
+    "kartpostal": {
+      "width_px": 252,
+      "height_px": 158,
+      "lifestyle_wh": [
+        640,
+        640
+      ],
+      "shadow_roi_wh": [
+        252,
+        158
+      ]
+    },
+    "sticker": {
+      "width_px": 428,
+      "height_px": 280,
+      "lifestyle_wh": [
+        640,
+        640
+      ],
+      "shadow_roi_wh": [
+        428,
+        280
+      ]
+    },
+    "kitap_ayraci": {
+      "width_px": 268,
+      "height_px": 245,
+      "lifestyle_wh": [
+        640,
+        640
+      ],
+      "shadow_roi_wh": [
+        268,
+        245
+      ]
+    },
+    "hediye_kagidi": {
+      "width_px": 353,
+      "height_px": 160,
+      "lifestyle_wh": [
+        640,
+        640
+      ],
+      "shadow_roi_wh": [
+        353,
+        160
+      ]
+    },
+    "kirlent": {
+      "width_px": 296,
+      "height_px": 242,
+      "lifestyle_wh": [
+        640,
+        640
+      ],
+      "shadow_roi_wh": [
+        296,
+        242
+      ]
+    },
+    "seyahat_termos": {
+      "width_px": 395,
+      "height_px": 413,
+      "lifestyle_wh": [
+        640,
+        640
+      ],
+      "shadow_roi_wh": [
+        395,
+        413
+      ]
+    },
+    "mousepad": {
+      "width_px": 537,
+      "height_px": 263,
+      "lifestyle_wh": [
+        640,
+        640
+      ],
+      "shadow_roi_wh": [
+        537,
+        263
+      ]
+    },
+    "magnet": {
+      "width_px": 378,
+      "height_px": 640,
+      "lifestyle_wh": [
+        640,
+        640
+      ],
+      "shadow_roi_wh": [
+        378,
+        640
+      ]
+    },
+    "album_sert": {
+      "width_px": 393,
+      "height_px": 195,
+      "lifestyle_wh": [
+        640,
+        640
+      ],
+      "shadow_roi_wh": [
+        393,
+        195
+      ]
+    },
+    "anahtarlik": {
+      "width_px": 640,
+      "height_px": 241,
+      "lifestyle_wh": [
+        640,
+        640
+      ],
+      "shadow_roi_wh": [
+        640,
+        241
+      ]
+    },
+    "laptop_kilifi": {
+      "width_px": 640,
+      "height_px": 640,
+      "lifestyle_wh": [
+        640,
+        640
+      ],
+      "shadow_roi_wh": [
+        640,
+        640
+      ]
+    },
+    "kisa_tisort": {
+      "width_px": 640,
+      "height_px": 640,
+      "lifestyle_wh": [
+        640,
+        640
+      ],
+      "shadow_roi_wh": [
+        640,
+        640
+      ]
+    },
+    "uzun_tisort": {
+      "width_px": 640,
+      "height_px": 640,
+      "lifestyle_wh": [
+        640,
+        640
+      ],
+      "shadow_roi_wh": [
+        640,
+        640
+      ]
+    },
+    "hoodie": {
+      "width_px": 640,
+      "height_px": 640,
+      "lifestyle_wh": [
+        640,
+        640
+      ],
+      "shadow_roi_wh": [
+        640,
+        640
+      ]
+    },
+    "mutfak_onlugu": {
+      "width_px": 640,
+      "height_px": 640,
+      "lifestyle_wh": [
+        640,
+        640
+      ],
+      "shadow_roi_wh": [
+        640,
+        640
+      ]
+    },
+    "sanat_onlugu": {
+      "width_px": 640,
+      "height_px": 640,
+      "lifestyle_wh": [
+        640,
+        640
+      ],
+      "shadow_roi_wh": [
+        640,
+        640
+      ]
+    },
+    "album_yumusak": {
+      "width_px": 457,
+      "height_px": 205,
+      "lifestyle_wh": [
+        640,
+        640
+      ],
+      "shadow_roi_wh": [
+        457,
+        205
+      ]
+    },
+    "celik_matara": {
+      "width_px": 114,
+      "height_px": 254,
+      "lifestyle_wh": [
+        640,
+        640
+      ],
+      "shadow_roi_wh": [
+        114,
+        254
+      ]
+    },
+    "renkli_kupa": {
+      "width_px": 198,
+      "height_px": 241,
+      "lifestyle_wh": [
+        640,
+        640
+      ],
+      "shadow_roi_wh": [
+        198,
+        241
+      ]
+    },
+    "seramik_bardak_altligi": {
+      "width_px": 375,
+      "height_px": 201,
+      "lifestyle_wh": [
+        640,
+        640
+      ],
+      "shadow_roi_wh": [
+        375,
+        201
+      ]
+    },
+    "ahsap_bardak_altligi": {
+      "width_px": 282,
+      "height_px": 147,
+      "lifestyle_wh": [
+        640,
+        640
+      ],
+      "shadow_roi_wh": [
+        282,
+        147
+      ]
+    },
+    "bebek_zibini": {
+      "width_px": 640,
+      "height_px": 640,
+      "lifestyle_wh": [
+        640,
+        640
+      ],
+      "shadow_roi_wh": [
+        640,
+        640
+      ]
+    },
+    "sapka": {
+      "width_px": 640,
+      "height_px": 640,
+      "lifestyle_wh": [
+        640,
+        640
+      ],
+      "shadow_roi_wh": [
+        640,
+        640
+      ]
+    },
+    "kumas_kalemlik": {
+      "width_px": 640,
+      "height_px": 640,
+      "lifestyle_wh": [
+        640,
+        640
+      ],
+      "shadow_roi_wh": [
+        640,
+        640
+      ]
+    },
+    "cerceveli_poster": {
+      "width_px": 191,
+      "height_px": 282,
+      "lifestyle_wh": [
+        640,
+        640
+      ],
+      "shadow_roi_wh": [
+        191,
+        282
+      ]
+    },
+    "buzgulu_sirt": {
+      "width_px": 640,
+      "height_px": 640,
+      "lifestyle_wh": [
+        640,
+        640
+      ],
+      "shadow_roi_wh": [
+        640,
+        640
+      ]
+    },
+    "akrilik_baski": {
+      "width_px": 640,
+      "height_px": 640,
+      "lifestyle_wh": [
+        640,
+        640
+      ],
+      "shadow_roi_wh": [
+        640,
+        640
+      ]
+    },
+    "metal_panel": {
+      "width_px": 640,
+      "height_px": 640,
+      "lifestyle_wh": [
+        640,
+        640
+      ],
+      "shadow_roi_wh": [
+        640,
+        640
+      ]
+    },
+    "telefon_kilifi": {
+      "width_px": 640,
+      "height_px": 640,
+      "lifestyle_wh": [
+        640,
+        640
+      ],
+      "shadow_roi_wh": [
+        640,
+        640
+      ]
+    },
+    "popsocket": {
+      "width_px": 640,
+      "height_px": 640,
+      "lifestyle_wh": [
+        640,
+        640
+      ],
+      "shadow_roi_wh": [
+        640,
+        640
+      ]
+    },
+    "tablet_kilifi": {
+      "width_px": 640,
+      "height_px": 640,
+      "lifestyle_wh": [
+        640,
+        640
+      ],
+      "shadow_roi_wh": [
+        640,
+        640
+      ]
+    },
+    "litofani": {
+      "width_px": 640,
+      "height_px": 640,
+      "lifestyle_wh": [
+        640,
+        640
+      ],
+      "shadow_roi_wh": [
+        640,
+        640
+      ]
+    },
+    "rozet": {
+      "width_px": 640,
+      "height_px": 640,
+      "lifestyle_wh": [
+        640,
+        640
+      ],
+      "shadow_roi_wh": [
+        640,
+        640
+      ]
+    },
+    "yilbasi_susu": {
+      "width_px": 640,
+      "height_px": 640,
+      "lifestyle_wh": [
+        640,
+        640
+      ],
+      "shadow_roi_wh": [
+        640,
+        640
+      ]
+    }
+  },
+  "errors": []
+}

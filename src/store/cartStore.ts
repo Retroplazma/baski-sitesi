@@ -5,17 +5,17 @@ import { PRODUCTS } from '@/data/products';
 function calculatePrice(productId: string, quantity: number): number {
   const product = PRODUCTS.find(p => p.id === productId);
   if (!product) return 0;
-  
+
   if (!product.quantityOptions || product.quantityOptions.length === 0) {
     return (product.basePrice || 0) * quantity;
   }
-  
+
   // Büyükten küçüğe sırala (Örn: 10, 5, 3, 1)
   const sortedOptions = [...product.quantityOptions].sort((a, b) => b.quantity - a.quantity);
-  
+
   let remaining = quantity;
   let total = 0;
-  
+
   for (const opt of sortedOptions) {
     if (remaining >= opt.quantity) {
       const count = Math.floor(remaining / opt.quantity);
@@ -23,7 +23,7 @@ function calculatePrice(productId: string, quantity: number): number {
       remaining -= count * opt.quantity;
     }
   }
-  
+
   return total;
 }
 
@@ -58,16 +58,16 @@ export const useCartStore = create<CartState>()(
       cart: [],
       isOpen: false,
       isAuthModalOpen: false,
-      
+
       addToCart: (item) => set((state) => {
         // Sepette aynı ürün (aynı varyantlar ve görselle) var mı kontrol et
         const existingItemIndex = state.cart.findIndex(i => i.id === item.id);
-        
+
         if (existingItemIndex >= 0) {
           // Varsa sadece miktarını ve fiyatını güncelle
           const newCart = [...state.cart];
           const newQuantity = newCart[existingItemIndex].quantity + item.quantity;
-          
+
           newCart[existingItemIndex] = {
             ...newCart[existingItemIndex],
             quantity: newQuantity,
@@ -103,11 +103,11 @@ export const useCartStore = create<CartState>()(
       })),
 
       clearCart: () => set({ cart: [] }),
-      
+
       toggleCart: () => set((state) => ({ isOpen: !state.isOpen })),
-      
+
       openCart: () => set({ isOpen: true }),
-      
+
       closeCart: () => set({ isOpen: false }),
 
       openAuthModal: () => set({ isAuthModalOpen: true }),

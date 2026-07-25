@@ -1,58 +1,40 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { verifyCheckoutToken } from "@/lib/jwt";
 
-export async function createOrder(formData: FormData, token: string) {
+export async function createOrder(customerData: any, cartItems: any[], totalAmount: number) {
   try {
-    // 1. Verilen token'ı doğrula
-    const payload = verifyCheckoutToken(token);
-    
-    if (!payload) {
-      throw new Error("Geçersiz veya süresi dolmuş token.");
-    }
+    const orderNumber = `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
-    // 2. FormData'dan verileri al
-    const firstName = formData.get("firstName") as string;
-    const lastName = formData.get("lastName") as string;
-    const email = formData.get("email") as string;
-    const shippingAddress = formData.get("shippingAddress") as string;
-    const billingAddress = formData.get("billingAddress") as string;
-    
-    const guestName = `${firstName} ${lastName}`.trim();
-
-    // 3. Veritabanından ilgili ürünü bul ve fiyatını öğren
-    const product = await prisma.product.findUnique({
-      where: { id: payload.productId },
-    });
-
-    if (!product) {
-      throw new Error("Sipariş verilmek istenen ürün bulunamadı.");
-    }
-
-    // 4. Prisma nested create ile Order ve OrderItem oluştur
     const order = await prisma.order.create({
       data: {
-        guestName,
-        guestEmail: email,
-        shippingAddress,
-        billingAddress,
+        orderNumber,
+        firstName: customerData.firstName,
+        lastName: customerData.lastName,
+        email: customerData.email,
+        phone: customerData.phone,
+        city: customerData.city,
+        district: customerData.district,
+        neighborhood: customerData.neighborhood,
+        address: customerData.address,
+        totalAmount,
+        status: "PENDING",
         orderItems: {
-          create: [
-            {
-              productId: product.id,
-              customImageUrl: payload.customImageUrl,
-              quantity: payload.quantity,
-              price: product.price, // Gerçek fiyat DB'den alınıyor
-            },
-          ],
-        },
-      },
+          create: cartItems.map((item) => ({
+            productId: item.productId,
+            productName: item.name,
+            price: item.price,
+            quantity: item.quantity,
+            variants: item.variants || {},
+            customImage: item.customImage || null,
+          }))
+        }
+      }
     });
 
-    return { success: true, orderId: order.id };
+    return { success: true, orderId: order.id, orderNumber: order.orderNumber };
   } catch (error: any) {
-    console.error("Sipariş oluşturulurken hata:", error);
-    return { success: false, error: error.message || "Bilinmeyen bir hata oluştu." };
+    console.error("Order creation error:", error);
+    return { success: false, error: error.message || String(error) };
   }
 }

@@ -30,6 +30,7 @@ export default function ProductDetailClient({ productId }: { productId: string }
     const foundProduct = PRODUCTS.find((p) => p.id === productId);
     if (foundProduct) {
       setProduct(foundProduct);
+      setActiveImage(foundProduct.image);
       
       // Select first options by default
       const initialVariants: Record<string, string> = {};
@@ -112,7 +113,7 @@ export default function ProductDetailClient({ productId }: { productId: string }
   }
 
   const category = CATEGORIES.find(c => c.slug === product.categorySlug);
-  const images = ["/placeholder.svg", "/placeholder.svg", "/placeholder.svg", "/placeholder.svg"];
+  const images = [product.image, "/placeholder.svg", "/placeholder.svg", "/placeholder.svg"];
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -122,20 +123,22 @@ export default function ProductDetailClient({ productId }: { productId: string }
         
         {/* SOL KOLON: Görsel Galerisi */}
         <div className="lg:col-span-4">
-          <div className="border border-gray-200 rounded-lg overflow-hidden bg-white mb-4 aspect-square flex justify-center items-center relative">
+          <div className="border border-gray-200 rounded-lg overflow-hidden bg-white mb-4 aspect-square flex justify-center items-center relative p-4">
             {product.isNew && (
               <span className="absolute top-4 left-4 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-sm shadow-sm z-10">YENİ</span>
             )}
-            <svg className="w-32 h-32 text-gray-200" fill="currentColor" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={activeImage} alt={product.name} className="w-full h-full object-contain" />
           </div>
           <div className="grid grid-cols-4 gap-4">
             {images.map((img, idx) => (
               <div 
                 key={idx} 
-                className={`aspect-square border-2 rounded-md overflow-hidden cursor-pointer flex justify-center items-center bg-gray-50 ${activeImage === img + idx ? 'border-sky-500' : 'border-transparent hover:border-gray-300'}`}
-                onClick={() => setActiveImage(img + idx)}
+                className={`aspect-square border-2 rounded-md overflow-hidden cursor-pointer flex justify-center items-center bg-gray-50 p-1 ${activeImage === img ? 'border-sky-500' : 'border-transparent hover:border-gray-300'}`}
+                onClick={() => setActiveImage(img)}
               >
-                 <svg className="w-8 h-8 text-gray-300" fill="currentColor" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                 {/* eslint-disable-next-line @next/next/no-img-element */}
+                 <img src={img} alt={`${product.name} ${idx}`} className="w-full h-full object-contain" />
               </div>
             ))}
           </div>
