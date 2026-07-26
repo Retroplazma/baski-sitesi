@@ -1,9 +1,13 @@
 "use server";
 
 import prisma from "@/lib/prisma";
+import { getServerSession } from "next-auth";
 
 export async function createOrder(customerData: any, cartItems: any[], totalAmount: number) {
   try {
+    const session = await getServerSession();
+    const userId = session?.user?.id;
+    
     const orderNumber = `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
     const order = await prisma.order.create({
@@ -19,6 +23,7 @@ export async function createOrder(customerData: any, cartItems: any[], totalAmou
         address: customerData.address,
         totalAmount,
         status: "PENDING",
+        ...(userId ? { userId } : {}),
         orderItems: {
           create: cartItems.map((item) => ({
             productId: item.productId,

@@ -5,11 +5,11 @@ import { useRouter } from "next/navigation";
 import { PRODUCTS, CATEGORIES, Product } from "@/data/products";
 import { useCartStore } from "@/store/cartStore";
 import Link from "next/link";
+import ImageUploader from "@/components/ImageUploader";
 
 export default function ProductDetailClient({ productId }: { productId: string }) {
   const [product, setProduct] = useState<Product | null>(null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("about");
   
@@ -21,7 +21,6 @@ export default function ProductDetailClient({ productId }: { productId: string }
   // Active main image
   const [activeImage, setActiveImage] = useState("/placeholder.svg");
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   
   const { addToCart, openCart } = useCartStore();
@@ -58,34 +57,15 @@ export default function ProductDetailClient({ productId }: { productId: string }
     setTotalPrice(price);
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const file = e.target.files[0];
-      setSelectedFile(file);
-      setPreviewUrl(URL.createObjectURL(file));
-    }
-  };
-
-  const handleClearFile = () => {
-    setSelectedFile(null);
-    setPreviewUrl(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
-
   const handleCheckout = async () => {
     if (!product) return;
     
-    if (!selectedFile) {
+    if (!uploadedUrl) {
       alert("Lütfen basılmasını istediğiniz görseli yükleyin.");
       return;
     }
 
     setLoading(true);
-
-    // Mock upload URL for now
-    const mockUploadedUrl = "https://via.placeholder.com/800x800.png?text=Musteri+Tasarimi";
     
     // Generate unique ID based on product id and variants
     const variantHash = Object.values(selectedVariants).join("-");
@@ -98,7 +78,7 @@ export default function ProductDetailClient({ productId }: { productId: string }
       name: product.name,
       price: totalPrice,
       quantity: selectedQuantity,
-      customImage: previewUrl || mockUploadedUrl,
+      customImage: uploadedUrl,
       variants: selectedVariants
     });
 
@@ -236,55 +216,10 @@ export default function ProductDetailClient({ productId }: { productId: string }
           )}
 
           {/* Tasarım Yükleme Alanı */}
-          <div>
-            <h3 className="text-sm font-bold text-gray-900 mb-3">Tasarımınızı Yükleyin</h3>
-            
-            {!previewUrl ? (
-              <div
-                onClick={() => fileInputRef.current?.click()}
-                className="flex flex-col justify-center items-center border-2 border-dashed border-gray-300 rounded-lg p-10 text-center bg-gray-50 hover:bg-sky-50 hover:border-sky-400 transition-colors cursor-pointer group"
-              >
-                <div className="bg-white p-4 rounded-full shadow-sm mb-4 group-hover:scale-110 transition-transform">
-                  <svg className="h-8 w-8 text-sky-500" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </div>
-                <div className="text-base text-gray-800 font-bold mb-1">
-                  Dosyanızı sürükleyin veya <span className="text-sky-500 underline">göz atın</span>
-                </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  Desteklenen formatlar: AI, PDF, PSD, PNG, JPG (Max 50MB)
-                </p>
-              </div>
-            ) : (
-              <div className="relative border border-gray-200 rounded-lg p-4 bg-gray-50 shadow-sm">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2 overflow-hidden">
-                    <svg className="w-5 h-5 text-green-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    <span className="text-sm font-medium text-gray-700 truncate">{selectedFile?.name}</span>
-                  </div>
-                  <button
-                    onClick={handleClearFile}
-                    className="text-gray-400 hover:text-red-500 bg-white p-1 rounded-md border border-gray-200 transition-colors focus:outline-none"
-                    title="Dosyayı Kaldır"
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                  </button>
-                </div>
-                <div className="relative rounded-md overflow-hidden bg-white border border-gray-200 flex justify-center items-center h-48">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={previewUrl} alt="Preview" className="object-contain w-full h-full" />
-                </div>
-              </div>
-            )}
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*,.ai,.pdf,.psd"
-              onChange={handleFileChange}
-              className="hidden"
-            />
-          </div>
+          <ImageUploader 
+            onUploadSuccess={(url) => setUploadedUrl(url)} 
+            onClear={() => setUploadedUrl(null)} 
+          />
 
         </div>
 
@@ -315,7 +250,7 @@ export default function ProductDetailClient({ productId }: { productId: string }
 
             <button
               onClick={handleCheckout}
-              disabled={loading || !selectedFile}
+              disabled={loading || !uploadedUrl}
               className="w-full flex justify-center items-center py-4 px-4 rounded-lg shadow-sm text-lg font-bold text-white bg-sky-500 hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all mb-4"
             >
               {loading ? (

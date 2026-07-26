@@ -9,6 +9,9 @@ import { initializeCheckout } from "@/actions/payment.action";
 import { createOrder } from "@/actions/order.action";
 import { PRODUCTS } from "@/data/products";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { getUserProfile } from "@/actions/profile.action";
+import { useEffect } from "react";
 
 const checkoutSchema = z.object({
   firstName: z.string().min(2, "Ad en az 2 karakter olmalıdır"),
@@ -30,10 +33,42 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
   const router = useRouter();
+  const { data: session } = useSession();
 
-  const { register, handleSubmit, formState: { errors } } = useForm<CheckoutFormValues>({
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutSchema)
   });
+
+  useEffect(() => {
+    async function loadUserData() {
+      if (session?.user?.id) {
+        const res = await getUserProfile(session.user.id);
+        if (res.success && res.data) {
+          const { name, email, phone, city, district, address } = res.data;
+          
+          let firstName = "";
+          let lastName = "";
+          if (name) {
+            const parts = name.trim().split(" ");
+            lastName = parts.length > 1 ? parts.pop() || "" : "";
+            firstName = parts.join(" ");
+          }
+
+          reset({
+            firstName: firstName || "",
+            lastName: lastName || "",
+            email: email || session.user.email || "",
+            phone: phone || "",
+            city: city || "",
+            district: district || "",
+            neighborhood: "", // Profilde mahalle tutmuyoruz
+            address: address || ""
+          });
+        }
+      }
+    }
+    loadUserData();
+  }, [session, reset]);
 
   const onSubmit = async (data: CheckoutFormValues) => {
     setLoading(true);

@@ -6,10 +6,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { PRODUCTS } from "@/data/products";
 
+import { useSession } from "next-auth/react";
+
 export default function CartDrawer() {
   const { cart, isOpen, closeCart, removeFromCart, updateQuantity, openAuthModal } = useCartStore();
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
+  const { data: session, status } = useSession();
 
   // Avoid hydration errors with persist
   useEffect(() => {
@@ -22,10 +25,12 @@ export default function CartDrawer() {
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   const handleCheckout = () => {
-    // Sepeti kapatmaya gerek yok, üstüne modal açılacak. 
-    // Kullanıcı modalda "Vazgeç/Kapat" derse sepeti hala görebilir. 
-    // Veya direkt openAuthModal() çağırırız.
-    openAuthModal();
+    if (status === "authenticated") {
+      closeCart();
+      router.push('/checkout');
+    } else {
+      openAuthModal();
+    }
   };
 
   return (
