@@ -4,9 +4,11 @@ import { notFound } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminOrderDetailPage({ params }: { params: { id: string } }) {
+export default async function AdminOrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  
   const order = await prisma.order.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       orderItems: true,
     }
