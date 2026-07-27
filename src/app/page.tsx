@@ -1,11 +1,13 @@
 import prisma from "@/lib/prisma";
 import Link from "next/link";
-import { PRODUCTS, CATEGORIES } from "@/data/products";
+import { CATEGORIES } from "@/data/products";
+import { getAllProductsCombined } from "@/lib/db-products";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const displayProducts = PRODUCTS.filter(p => p.isPopular).slice(0, 8);
+  const allProducts = await getAllProductsCombined();
+  const displayProducts = allProducts.filter(p => p.isPopular || p.isNew).slice(0, 8);
 
   return (
     <div className="bg-gray-50 pb-20">

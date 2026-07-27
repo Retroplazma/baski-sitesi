@@ -1,6 +1,7 @@
 import prisma from "@/lib/prisma";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import OrderStatusUpdater from "./OrderStatusUpdater";
 
 export const dynamic = "force-dynamic";
 
@@ -96,6 +97,8 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
         </div>
 
         <div className="space-y-6">
+          <OrderStatusUpdater orderId={order.id} currentStatus={order.status} />
+
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
             <h2 className="font-semibold text-gray-900 mb-4">Müşteri Bilgileri</h2>
             <div className="space-y-3 text-sm">

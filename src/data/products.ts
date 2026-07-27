@@ -34,6 +34,7 @@ export const CATEGORIES: Category[] = [
   { slug: 'teknoloji-aksesuarlari', name: 'Teknoloji Aksesuarları' },
   { slug: 'oyun-eglence-ve-hobi', name: 'Oyun, Eğlence ve Hobi' },
   { slug: 'gunluk-kullanim-ve-hediyelik', name: 'Günlük Kullanım ve Hediyelik' },
+  { slug: 'diger-urunler', name: 'Diğer Ürünler' },
 ];
 
 // Helper to generate some common variants

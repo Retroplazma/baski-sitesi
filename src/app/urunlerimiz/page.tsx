@@ -1,14 +1,14 @@
 import Link from 'next/link';
-import { PRODUCTS } from '@/data/products';
-import Image from 'next/image';
+import { getAllProductsCombined } from '@/lib/db-products';
 
-export default function UrunlerimizPage() {
+export default async function UrunlerimizPage() {
+  const allProducts = await getAllProductsCombined();
   return (
     <div>
       <h2 className="text-2xl font-bold text-gray-900 mb-6">Tüm Ürünler</h2>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {PRODUCTS.map((product) => (
+        {allProducts.map((product) => (
           <Link key={product.id} href={`/product/${product.id}`} className="group block bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
             <div className="relative aspect-square bg-gray-100">
               <div className="absolute inset-0 flex items-center justify-center text-gray-400 bg-white">

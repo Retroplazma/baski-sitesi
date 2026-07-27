@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { registerUser } from "@/actions/register.action";
+import { forgotPassword } from "@/actions/auth.action";
 
 // Zod schemas
 const registerSchema = z.object({
@@ -29,6 +30,7 @@ export default function CheckoutAuthModal() {
   const [successMessage, setSuccessMessage] = useState("");
 
   const [forgotEmail, setForgotEmail] = useState("");
+  const [isForgotting, setIsForgotting] = useState(false);
 
   const {
     register: registerForm,
@@ -91,17 +93,27 @@ export default function CheckoutAuthModal() {
     }
   };
 
-  const onForgot = (e: React.FormEvent) => {
+  const onForgot = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError("");
+    setSuccessMessage("");
+    
     if (!forgotEmail) {
       setLoginError("Lütfen e-posta adresinizi giriniz.");
       return;
     }
-    // Mocking success
-    setSuccessMessage("E-posta adresinize sıfırlama bağlantısı gönderildi.");
-    setMode("login");
-    setForgotEmail("");
+
+    setIsForgotting(true);
+    const res = await forgotPassword(forgotEmail);
+    setIsForgotting(false);
+
+    if (res.success) {
+      setSuccessMessage(res.message || "E-posta adresinize sıfırlama bağlantısı gönderildi.");
+      setMode("login");
+      setForgotEmail("");
+    } else {
+      setLoginError(res.message || "Bir hata oluştu.");
+    }
   };
 
   // Reset states when changing mode
@@ -244,9 +256,10 @@ export default function CheckoutAuthModal() {
                     </div>
                     <button 
                       type="submit" 
-                      className="w-full py-4 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-md shadow-sm transition-colors text-lg"
+                      disabled={isForgotting}
+                      className="w-full py-4 bg-sky-500 hover:bg-sky-600 disabled:bg-sky-300 text-white font-bold rounded-md shadow-sm transition-colors text-lg flex items-center justify-center gap-2"
                     >
-                      Sıfırlama Linki Gönder
+                      {isForgotting ? "Gönderiliyor..." : "Sıfırlama Linki Gönder"}
                     </button>
                   </form>
                   <div className="mt-6 text-center">

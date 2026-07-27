@@ -1,13 +1,16 @@
 import Link from 'next/link';
-import { PRODUCTS, CATEGORIES } from '@/data/products';
+import { CATEGORIES } from '@/data/products';
 import { notFound } from 'next/navigation';
+import { getAllProductsCombined } from '@/lib/db-products';
 
 export default async function CategoryPage({ params }: { params: Promise<{ category: string }> }) {
   const { category: categorySlug } = await params;
   
+  const allProducts = await getAllProductsCombined();
+  
   // Custom pages check
   if (categorySlug === 'yeni-urunler') {
-    const newProducts = PRODUCTS.filter(p => p.isNew);
+    const newProducts = allProducts.filter(p => p.isNew);
     return (
       <div>
         <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
@@ -41,7 +44,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
     notFound();
   }
 
-  const categoryProducts = PRODUCTS.filter(p => p.categorySlug === categorySlug);
+  const categoryProducts = allProducts.filter(p => p.categorySlug === categorySlug);
 
   return (
     <div>

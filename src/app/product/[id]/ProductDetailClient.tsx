@@ -2,13 +2,13 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { PRODUCTS, CATEGORIES, Product } from "@/data/products";
+import { CATEGORIES, Product } from "@/data/products";
 import { useCartStore } from "@/store/cartStore";
 import Link from "next/link";
 import ImageUploader from "@/components/ImageUploader";
 
-export default function ProductDetailClient({ productId }: { productId: string }) {
-  const [product, setProduct] = useState<Product | null>(null);
+export default function ProductDetailClient({ initialProduct }: { initialProduct: Product }) {
+  const [product, setProduct] = useState<Product>(initialProduct);
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("about");
@@ -19,34 +19,28 @@ export default function ProductDetailClient({ productId }: { productId: string }
   const [totalPrice, setTotalPrice] = useState<number>(0);
   
   // Active main image
-  const [activeImage, setActiveImage] = useState("/placeholder.svg");
+  const [activeImage, setActiveImage] = useState(initialProduct.image || "/placeholder.svg");
 
   const router = useRouter();
   
   const { addToCart, openCart } = useCartStore();
 
   useEffect(() => {
-    const foundProduct = PRODUCTS.find((p) => p.id === productId);
-    if (foundProduct) {
-      setProduct(foundProduct);
-      setActiveImage(foundProduct.image);
-      
-      // Select first options by default
-      const initialVariants: Record<string, string> = {};
-      foundProduct.variants?.forEach((variant) => {
-        initialVariants[variant.name] = variant.options[0];
-      });
-      setSelectedVariants(initialVariants);
+    // Select first options by default
+    const initialVariants: Record<string, string> = {};
+    initialProduct.variants?.forEach((variant) => {
+      initialVariants[variant.name] = variant.options[0];
+    });
+    setSelectedVariants(initialVariants);
 
-      // Select first quantity option by default
-      if (foundProduct.quantityOptions && foundProduct.quantityOptions.length > 0) {
-        setSelectedQuantity(foundProduct.quantityOptions[0].quantity);
-        setTotalPrice(foundProduct.quantityOptions[0].price);
-      } else if (foundProduct.basePrice) {
-        setTotalPrice(foundProduct.basePrice);
-      }
+    // Select first quantity option by default
+    if (initialProduct.quantityOptions && initialProduct.quantityOptions.length > 0) {
+      setSelectedQuantity(initialProduct.quantityOptions[0].quantity);
+      setTotalPrice(initialProduct.quantityOptions[0].price);
+    } else if (initialProduct.basePrice) {
+      setTotalPrice(initialProduct.basePrice);
     }
-  }, [productId]);
+  }, [initialProduct]);
 
   const handleVariantSelect = (variantName: string, option: string) => {
     setSelectedVariants(prev => ({ ...prev, [variantName]: option }));
