@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { getUserProfile } from "@/actions/profile.action";
 import { useEffect } from "react";
+import Link from "next/link";
 
 const checkoutSchema = z.object({
   firstName: z.string().min(2, "Ad en az 2 karakter olmalıdır"),
@@ -22,6 +23,7 @@ const checkoutSchema = z.object({
   district: z.string().min(2, "İlçe zorunludur"),
   neighborhood: z.string().min(2, "Mahalle zorunludur"),
   address: z.string().min(10, "Açık adres detaylı olmalıdır"),
+  acceptTerms: z.boolean().refine(val => val === true, "Siparişi tamamlamak için sözleşmeleri onaylamalısınız."),
 });
 
 type CheckoutFormValues = z.infer<typeof checkoutSchema>;
@@ -62,7 +64,8 @@ export default function CheckoutPage() {
             city: city || "",
             district: district || "",
             neighborhood: "", // Profilde mahalle tutmuyoruz
-            address: address || ""
+            address: address || "",
+            acceptTerms: false
           });
         }
       }
@@ -222,6 +225,29 @@ export default function CheckoutPage() {
               <div className="flex justify-between items-center text-lg font-bold text-gray-900 border-t border-gray-100 pt-4 mb-6">
                 <span>Toplam Tutar</span>
                 <span>{totalPrice.toLocaleString("tr-TR", { style: "currency", currency: "TRY" })}</span>
+              </div>
+
+              <div className="mb-6">
+                <label className="flex items-start gap-3 cursor-pointer group">
+                  <div className="flex items-center h-5 mt-0.5">
+                    <input 
+                      type="checkbox" 
+                      {...register("acceptTerms")}
+                      className="w-5 h-5 rounded border-gray-300 text-orange-500 focus:ring-orange-500 transition-colors cursor-pointer"
+                    />
+                  </div>
+                  <div className="text-sm text-gray-600 leading-snug">
+                    <Link href="/sozlesmeler/mesafeli-satis" target="_blank" className="text-orange-600 hover:text-orange-700 hover:underline transition-colors font-medium">Ön Bilgilendirme Formu</Link>
+                    'nu ve <Link href="/sozlesmeler/mesafeli-satis" target="_blank" className="text-orange-600 hover:text-orange-700 hover:underline transition-colors font-medium">Mesafeli Satış Sözleşmesi</Link>
+                    'ni okudum, onaylıyorum.
+                  </div>
+                </label>
+                {errors.acceptTerms && (
+                  <div className="text-red-500 text-sm mt-2 font-medium bg-red-50 p-2 rounded border border-red-100 flex items-center gap-2">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    {errors.acceptTerms.message}
+                  </div>
+                )}
               </div>
 
               <button 

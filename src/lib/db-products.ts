@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma";
-import { PRODUCTS, Product } from "@/data/products";
+import { Product } from "@/data/products";
 
 // Helper to map a Prisma product to the static Product interface
 export function mapPrismaProductToStatic(dbProduct: any): Product {
@@ -10,7 +10,10 @@ export function mapPrismaProductToStatic(dbProduct: any): Product {
     categorySlug: dbProduct.category,
     image: dbProduct.imageUrl || "/placeholder.svg",
     basePrice: dbProduct.price,
-    isNew: true, // we can consider DB products as new
+    isNew: dbProduct.isNew || false,
+    isPopular: dbProduct.isPopular || false,
+    variants: dbProduct.variants || undefined,
+    quantityOptions: dbProduct.quantityOptions || undefined,
   };
 }
 
@@ -20,18 +23,14 @@ export async function getAllProductsCombined(): Promise<Product[]> {
       where: { isActive: true },
       orderBy: { createdAt: "desc" },
     });
-    const mapped = dbProducts.map(mapPrismaProductToStatic);
-    return [...mapped, ...PRODUCTS];
+    return dbProducts.map(mapPrismaProductToStatic);
   } catch (error) {
     console.error("Error fetching combined products:", error);
-    return PRODUCTS;
+    return [];
   }
 }
 
 export async function getProductByIdCombined(id: string): Promise<Product | null> {
-  const staticProduct = PRODUCTS.find((p) => p.id === id);
-  if (staticProduct) return staticProduct;
-
   try {
     const dbProduct = await prisma.product.findUnique({
       where: { id, isActive: true },

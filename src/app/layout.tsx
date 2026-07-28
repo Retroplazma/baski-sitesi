@@ -77,13 +77,13 @@ export default function RootLayout({
                 <ul className="space-y-3 text-sm">
                   {[
                     { name: 'Üyelik Sözleşmesi', path: '/musteri-iliskileri/uyelik-sozlesmesi' },
-                    { name: 'İade / Değişim', path: '/musteri-iliskileri/iade-degisim' },
-                    { name: 'KVKK Aydınlatma Metni', path: '/musteri-iliskileri/kvkk' },
+                    { name: 'İptal / İade', path: '/sozlesmeler/iptal-iade' },
+                    { name: 'KVKK Aydınlatma Metni', path: '/sozlesmeler/kvkk' },
                     { name: 'Güvenli Alışveriş', path: '/musteri-iliskileri/guvenli-alisveris' },
                     { name: 'Kargo', path: '/musteri-iliskileri/kargo' },
                     { name: 'Kullanım Koşulları', path: '/musteri-iliskileri/kullanim-kosullari' },
-                    { name: 'Mesafeli Satış Sözleşmesi', path: '/musteri-iliskileri/mesafeli-satis' },
-                    { name: 'Hakkımızda', path: '/musteri-iliskileri/hakkimizda' },
+                    { name: 'Mesafeli Satış Sözleşmesi', path: '/sozlesmeler/mesafeli-satis' },
+                    { name: 'Hakkımızda', path: '/hakkimizda' },
                     { name: 'Bize Ulaşın', path: '/musteri-iliskileri/bize-ulasin' },
                     { name: 'Blog', path: '/musteri-iliskileri/blog' },
                     { name: 'Çerez Politikası', path: '/musteri-iliskileri/cerez-politikasi' }

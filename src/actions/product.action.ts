@@ -2,6 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { PRODUCTS } from "@/data/products";
 
 export async function getAdminProducts() {
   try {
@@ -21,12 +22,20 @@ export async function createProduct(data: {
   price: number;
   category: string;
   imageUrl: string;
+  galleryImages?: string[];
   isCustomizable: boolean;
   isActive: boolean;
+  isPopular?: boolean;
+  isNew?: boolean;
 }) {
   try {
     const product = await prisma.product.create({
-      data,
+      data: {
+        ...data,
+        galleryImages: data.galleryImages || [],
+        isPopular: data.isPopular || false,
+        isNew: data.isNew || false,
+      },
     });
 
     revalidatePath("/admin/products");
@@ -44,13 +53,21 @@ export async function updateProduct(id: string, data: {
   price: number;
   category: string;
   imageUrl: string;
+  galleryImages?: string[];
   isCustomizable: boolean;
   isActive: boolean;
+  isPopular?: boolean;
+  isNew?: boolean;
 }) {
   try {
     const product = await prisma.product.update({
       where: { id },
-      data,
+      data: {
+        ...data,
+        galleryImages: data.galleryImages || [],
+        isPopular: data.isPopular || false,
+        isNew: data.isNew || false,
+      },
     });
 
     revalidatePath("/admin/products");
@@ -74,5 +91,39 @@ export async function deleteProduct(id: string) {
   } catch (error) {
     console.error("deleteProduct error:", error);
     return { success: false, error: "Ürün silinemedi." };
+  }
+}
+
+export async function seedMockProducts() {
+  try {
+    // Tüm mevcut ürünleri sil (sıfırdan başlat)
+    await prisma.product.deleteMany();
+
+    let createdCount = 0;
+    for (const p of PRODUCTS) {
+      await prisma.product.create({
+        data: {
+          name: p.name,
+          description: p.description,
+          price: p.basePrice || 0,
+          category: p.categorySlug,
+          imageUrl: p.image,
+          galleryImages: [],
+          isCustomizable: true,
+          isActive: true,
+          isPopular: p.isPopular || false,
+          isNew: p.isNew || false,
+          variants: p.variants ? JSON.parse(JSON.stringify(p.variants)) : null,
+          quantityOptions: p.quantityOptions ? JSON.parse(JSON.stringify(p.quantityOptions)) : null,
+        }
+      });
+      createdCount++;
+    }
+    
+    revalidatePath("/");
+    return { success: true, count: createdCount };
+  } catch (error) {
+    console.error("seedMockProducts error:", error);
+    return { success: false, error: "Mock veriler eklenemedi." };
   }
 }

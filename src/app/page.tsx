@@ -33,6 +33,33 @@ export default async function HomePage() {
         </div>
       </div>
 
+      {/* Print and Play Banner */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
+        <Link href="/print-and-play" className="group block bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 relative p-8 md:p-10">
+          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div>
+              <h2 className="text-3xl font-extrabold text-white mb-2 flex items-center gap-3">
+                <svg className="w-8 h-8 opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                Print & Play Atölyesi
+              </h2>
+              <p className="text-orange-50 text-lg max-w-xl">
+                Kutu oyunları, kartlar, stickerlar ve 3D modellerinizi özel olarak bastırın. Hemen dosyanızı yükleyin ve teklif alın!
+              </p>
+            </div>
+            <div className="shrink-0 flex items-center gap-2 bg-white text-orange-600 px-6 py-3 rounded-lg font-bold shadow-md group-hover:scale-105 transition-transform">
+              Keşfet
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+            </div>
+          </div>
+          {/* Dekoratif Arka Plan Deseni */}
+          <div className="absolute top-0 right-0 -mt-10 -mr-10 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
+            <svg className="w-64 h-64 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2L2 7l10 5 10-5-10-5zm0 2.8L19.2 7 12 10.6 4.8 7 12 4.8zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
+          </div>
+        </Link>
+      </div>
+
       {/* Categories Menu */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
         <div className="flex items-center justify-between mb-6">

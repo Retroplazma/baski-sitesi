@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { createProduct, updateProduct } from "@/actions/product.action";
 import ImageUploader from "@/components/ImageUploader";
+import GalleryUploader from "@/components/GalleryUploader";
 import { CATEGORIES } from "@/data/products";
 
 const productSchema = z.object({
@@ -27,6 +28,7 @@ export default function ProductForm({
   onClose: () => void;
 }) {
   const [imageUrl, setImageUrl] = useState<string>(product?.imageUrl || "");
+  const [galleryImages, setGalleryImages] = useState<string[]>(product?.galleryImages || []);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -52,7 +54,7 @@ export default function ProductForm({
     setError("");
 
     try {
-      const payload = { ...data, imageUrl };
+      const payload = { ...data, imageUrl, galleryImages };
       
       let res;
       if (product) {
@@ -100,6 +102,15 @@ export default function ProductForm({
                   <button type="button" onClick={() => setImageUrl("")} className="text-red-500 hover:text-red-700 text-sm font-medium px-2">Kaldır</button>
                 </div>
               )}
+            </div>
+
+            {/* Gallery Uploader */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Ek Görseller (Galeri)</label>
+              <GalleryUploader 
+                initialUrls={galleryImages} 
+                onUploadSuccess={(urls) => setGalleryImages(urls)} 
+              />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

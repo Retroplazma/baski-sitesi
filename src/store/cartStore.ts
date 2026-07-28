@@ -1,17 +1,17 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { PRODUCTS } from '@/data/products';
 
-function calculatePrice(productId: string, quantity: number): number {
-  const product = PRODUCTS.find(p => p.id === productId);
-  if (!product) return 0;
+function calculatePrice(item: Omit<CartItem, 'price'>, quantity: number, customPrice?: number): number {
+  if (item.productId === 'pnp-custom' && customPrice !== undefined) {
+    return customPrice * quantity;
+  }
 
-  if (!product.quantityOptions || product.quantityOptions.length === 0) {
-    return (product.basePrice || 0) * quantity;
+  if (!item.quantityOptions || item.quantityOptions.length === 0) {
+    return (item.basePrice || 0) * quantity;
   }
 
   // Büyükten küçüğe sırala (Örn: 10, 5, 3, 1)
-  const sortedOptions = [...product.quantityOptions].sort((a, b) => b.quantity - a.quantity);
+  const sortedOptions = [...item.quantityOptions].sort((a, b) => b.quantity - a.quantity);
 
   let remaining = quantity;
   let total = 0;
@@ -34,6 +34,9 @@ export interface CartItem {
   price: number;
   quantity: number;
   customImage: string | null;
+  productImage?: string;
+  basePrice?: number;
+  quantityOptions?: { quantity: number; price: number }[];
   variants: Record<string, string>;
 }
 
@@ -71,14 +74,14 @@ export const useCartStore = create<CartState>()(
           newCart[existingItemIndex] = {
             ...newCart[existingItemIndex],
             quantity: newQuantity,
-            price: calculatePrice(item.productId, newQuantity)
+            price: calculatePrice(newCart[existingItemIndex], newQuantity, item.productId === 'pnp-custom' ? item.price / item.quantity : undefined)
           };
           return { cart: newCart };
         } else {
           // Yoksa yeni olarak ekle, fiyatını doğrula
           const verifiedItem = {
             ...item,
-            price: calculatePrice(item.productId, item.quantity)
+            price: calculatePrice(item, item.quantity, item.productId === 'pnp-custom' ? item.price / item.quantity : undefined)
           };
           return { cart: [...state.cart, verifiedItem] };
         }
@@ -95,7 +98,7 @@ export const useCartStore = create<CartState>()(
             return {
               ...item,
               quantity: newQuantity,
-              price: calculatePrice(item.productId, newQuantity)
+              price: calculatePrice(item, newQuantity, item.productId === 'pnp-custom' ? item.price / item.quantity : undefined)
             };
           }
           return item;

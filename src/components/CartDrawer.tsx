@@ -4,7 +4,6 @@ import { useCartStore } from "@/store/cartStore";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { PRODUCTS } from "@/data/products";
 
 import { useSession } from "next-auth/react";
 
@@ -75,8 +74,7 @@ export default function CartDrawer() {
             </div>
           ) : (
             cart.map((item) => {
-              const product = PRODUCTS.find(p => p.id === item.productId);
-              const imageSrc = item.customImage || product?.image || '/placeholder.svg';
+              const imageSrc = item.customImage || item.productImage || '/placeholder.svg';
               
               return (
               <div key={item.id} className="flex gap-4 p-3 bg-white border border-gray-200 rounded-lg shadow-sm">

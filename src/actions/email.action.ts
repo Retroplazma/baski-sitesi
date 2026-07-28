@@ -26,7 +26,7 @@ export async function sendOrderConfirmationEmail(
     `;
 
     const data = await resend.emails.send({
-      from: 'Baskı Atölyesi <onboarding@resend.dev>',
+      from: 'Baskı Atölyesi <siparis@baski-atolyesi.com>',
       to: [userEmail],
       subject: `Siparişiniz Alındı - #${orderNumber}`,
       html: htmlContent,
@@ -60,7 +60,7 @@ export async function sendPasswordResetEmail(userEmail: string, resetLink: strin
     `;
 
     const data = await resend.emails.send({
-      from: 'Baskı Atölyesi <onboarding@resend.dev>',
+      from: 'Baskı Atölyesi <destek@baski-atolyesi.com>',
       to: [userEmail],
       subject: 'Şifre Sıfırlama Talebi',
       html: htmlContent,
@@ -92,7 +92,7 @@ export async function sendOrderShippedEmail(
     `;
 
     const data = await resend.emails.send({
-      from: 'Baskı Atölyesi <onboarding@resend.dev>',
+      from: 'Baskı Atölyesi <siparis@baski-atolyesi.com>',
       to: [userEmail],
       subject: `Siparişiniz Kargoya Verildi - #${orderNumber}`,
       html: htmlContent,
@@ -102,6 +102,83 @@ export async function sendOrderShippedEmail(
     return { success: true, data };
   } catch (error) {
     console.error("Error sending order shipped email:", error);
+    return { success: false, error };
+  }
+}
+
+export async function sendQuoteRequestAdminEmail(
+  quoteDetails: {
+    orderNumber: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    message: string;
+    wantsBox: boolean;
+    fileUrls: string[];
+  }
+) {
+  try {
+    const htmlContent = `
+      <div style="font-family: sans-serif; max-w-xl mx-auto p-4 border rounded shadow-sm">
+        <h2 style="color: #00008F;">Yeni Bir Teklif Talebi Geldi</h2>
+        <p><strong>Müşteri:</strong> ${quoteDetails.firstName} ${quoteDetails.lastName}</p>
+        <p><strong>E-posta:</strong> ${quoteDetails.email}</p>
+        <p><strong>Telefon:</strong> ${quoteDetails.phone}</p>
+        
+        <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
+          <p style="margin: 0;"><strong>Talep Numarası:</strong> ${quoteDetails.orderNumber}</p>
+          <p style="margin: 10px 0 0;"><strong>Özel Kutu İsteği:</strong> ${quoteDetails.wantsBox ? 'Evet' : 'Hayır'}</p>
+          <p style="margin: 10px 0 0;"><strong>Mesaj/Detay:</strong> ${quoteDetails.message || 'Belirtilmedi'}</p>
+          <p style="margin: 10px 0 0;"><strong>Dosyalar:</strong> ${quoteDetails.fileUrls.map(url => `<a href="${url}">Dosyayı Gör</a>`).join(', ')}</p>
+        </div>
+      </div>
+    `;
+
+    const data = await resend.emails.send({
+      from: 'Baskı Atölyesi <siparis@baski-atolyesi.com>',
+      to: ['admin@sode.com.tr'], // Admin email as agreed in the plan
+      subject: `Yeni Teklif Talebi - #${quoteDetails.orderNumber}`,
+      html: htmlContent,
+    });
+
+    console.log("Quote admin email sent:", data);
+    return { success: true, data };
+  } catch (error) {
+    console.error("Error sending quote admin email:", error);
+    return { success: false, error };
+  }
+}
+
+export async function sendQuoteRequestCustomerEmail(
+  userEmail: string,
+  firstName: string,
+  orderNumber: string
+) {
+  try {
+    const htmlContent = `
+      <div style="font-family: sans-serif; max-w-xl mx-auto p-4 border rounded shadow-sm">
+        <h2 style="color: #00008F;">Talebiniz Alındı</h2>
+        <p>Merhaba ${firstName},</p>
+        <p><strong>#${orderNumber}</strong> numaralı 3D Baskı / Kutu talebiniz başarıyla sistemimize ulaştı.</p>
+        
+        <p>Ekibimiz yüklediğiniz dosyaları ve detayları inceleyip, fiyatlandırma ve üretim süreci hakkında en kısa sürede sizinle iletişime geçecektir.</p>
+        
+        <p style="margin-top: 30px; font-size: 0.9em; color: #666;">Baskı Atölyesi Ekibi</p>
+      </div>
+    `;
+
+    const data = await resend.emails.send({
+      from: 'Baskı Atölyesi <siparis@baski-atolyesi.com>',
+      to: [userEmail],
+      subject: `Talebiniz Alındı - #${orderNumber}`,
+      html: htmlContent,
+    });
+
+    console.log("Quote customer email sent:", data);
+    return { success: true, data };
+  } catch (error) {
+    console.error("Error sending quote customer email:", error);
     return { success: false, error };
   }
 }
