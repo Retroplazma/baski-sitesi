@@ -6,6 +6,8 @@ import HeaderCartButton from '@/components/HeaderCartButton';
 import CartDrawer from '@/components/CartDrawer';
 import CheckoutAuthModal from '@/components/CheckoutAuthModal';
 import HeaderLoginButton from '@/components/HeaderLoginButton';
+import SearchBar from '@/components/SearchBar';
+import WhatsAppButton from '@/components/WhatsAppButton';
 import { AuthProvider } from '@/providers/AuthProvider';
 import Image from 'next/image';
 import { Info, ChevronDown } from 'lucide-react';
@@ -48,18 +50,7 @@ export default function RootLayout({
             </div>
             {/* Search */}
             <div className="flex-1 max-w-2xl hidden md:block">
-              <div className="relative">
-                <input 
-                  type="text" 
-                  placeholder="Ürün, kategori veya marka ara..." 
-                  className="w-full bg-gray-100 border-none rounded-md py-3 pl-4 pr-10 focus:ring-2 focus:ring-orange-500 focus:bg-white transition-colors outline-none"
-                />
-                <div className="absolute right-3 top-3 text-gray-400">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                </div>
-              </div>
+              <SearchBar />
             </div>
             
             {/* Actions */}
@@ -107,7 +98,7 @@ export default function RootLayout({
                 </li>
                 <li>
                   <Link 
-                    href="/yeni-urunler"
+                    href="/urunlerimiz/yeni-urunler"
                     className="block px-2 py-2 text-sm font-semibold text-slate-600 hover:text-orange-500 transition-colors whitespace-nowrap"
                   >
                     Yeni Ürünler
@@ -115,7 +106,7 @@ export default function RootLayout({
                 </li>
                 <li>
                   <Link 
-                    href="/urunlerimiz"
+                    href="/urunlerimiz/populer-urunler"
                     className="block px-2 py-2 text-sm font-semibold text-slate-600 hover:text-orange-500 transition-colors whitespace-nowrap"
                   >
                     Popüler Ürünler
@@ -239,6 +230,7 @@ export default function RootLayout({
             </div>
           </div>
         </footer>
+        <WhatsAppButton />
         </AuthProvider>
       </body>
     </html>

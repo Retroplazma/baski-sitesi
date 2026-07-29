@@ -24,6 +24,7 @@ export interface Product {
   basePrice?: number;
   variants?: Variant[];
   quantityOptions?: QuantityOption[];
+  options?: { title: string; choices: { name: string; priceModifier: number }[] }[];
   allowMultipleDesigns?: boolean;
 }
 

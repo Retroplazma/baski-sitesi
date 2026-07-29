@@ -107,6 +107,12 @@ export default function CartDrawer() {
                       {Object.entries(item.variants).map(([k, v]) => (
                         <div key={k}><span className="font-medium text-gray-700">{k}:</span> {v}</div>
                       ))}
+                      {item.selectedOptions && Object.entries(item.selectedOptions).map(([k, v]) => (
+                        <div key={k}>
+                          <span className="font-medium text-gray-700">{k}:</span> {v.name} 
+                          {v.priceModifier > 0 && <span className="text-green-600 ml-1">(+{v.priceModifier} TL)</span>}
+                        </div>
+                      ))}
                     </div>
                   </div>
 

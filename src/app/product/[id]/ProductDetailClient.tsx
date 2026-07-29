@@ -15,8 +15,8 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
   
   // State for selected variants and quantity
   const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({});
+  const [selectedDynamicOptions, setSelectedDynamicOptions] = useState<Record<string, {name: string, priceModifier: number}>>({});
   const [selectedQuantity, setSelectedQuantity] = useState<number>(1);
-  const [totalPrice, setTotalPrice] = useState<number>(0);
   
   // Active main image
   const [activeImage, setActiveImage] = useState(initialProduct.image || "/placeholder.svg");
@@ -33,22 +33,45 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
     });
     setSelectedVariants(initialVariants);
 
+    const initialDynamicOptions: Record<string, {name: string, priceModifier: number}> = {};
+    if (Array.isArray(initialProduct.options)) {
+      initialProduct.options.forEach((group: any) => {
+        if (group.choices && group.choices.length > 0) {
+          initialDynamicOptions[group.title] = group.choices[0];
+        }
+      });
+    }
+    setSelectedDynamicOptions(initialDynamicOptions);
+
     // Select first quantity option by default
     if (initialProduct.quantityOptions && initialProduct.quantityOptions.length > 0) {
       setSelectedQuantity(initialProduct.quantityOptions[0].quantity);
-      setTotalPrice(initialProduct.quantityOptions[0].price);
-    } else if (initialProduct.basePrice) {
-      setTotalPrice(initialProduct.basePrice);
     }
   }, [initialProduct]);
+
+  // Fiyat Hesaplama
+  const modifiersSum = Object.values(selectedDynamicOptions).reduce((sum, opt) => sum + (opt.priceModifier || 0), 0);
+  
+  let basePriceForQty = 0;
+  if (product.quantityOptions && product.quantityOptions.length > 0) {
+    const matchedOpt = product.quantityOptions.find(o => o.quantity === selectedQuantity);
+    basePriceForQty = matchedOpt ? matchedOpt.price : product.quantityOptions[0].price;
+  } else {
+    basePriceForQty = (product.basePrice || 0) * selectedQuantity;
+  }
+  
+  const totalPrice = basePriceForQty + (modifiersSum * selectedQuantity);
 
   const handleVariantSelect = (variantName: string, option: string) => {
     setSelectedVariants(prev => ({ ...prev, [variantName]: option }));
   };
 
-  const handleQuantitySelect = (quantity: number, price: number) => {
+  const handleDynamicOptionSelect = (groupTitle: string, choice: {name: string, priceModifier: number}) => {
+    setSelectedDynamicOptions(prev => ({ ...prev, [groupTitle]: choice }));
+  };
+
+  const handleQuantitySelect = (quantity: number) => {
     setSelectedQuantity(quantity);
-    setTotalPrice(price);
   };
 
   const handleCheckout = async () => {
@@ -70,11 +93,12 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
       id: cartItemId,
       productId: product.id,
       name: product.name,
-      price: totalPrice,
+      price: totalPrice, // This might be overridden by cart calculate logic, so we'll pass basePrice and let cart do it
       quantity: selectedQuantity,
       customImage: uploadedUrls[0],
       customImages: uploadedUrls,
       variants: selectedVariants,
+      selectedOptions: selectedDynamicOptions,
       basePrice: product.basePrice,
       quantityOptions: product.quantityOptions
     });
@@ -146,7 +170,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
             <p className="text-gray-600 leading-relaxed">{product.description}</p>
           </div>
 
-          {/* Dinamik Varyantlar */}
+          {/* Dinamik Varyantlar (Eski Sistem) */}
           {product.variants && product.variants.map((variant) => (
             <div key={variant.name}>
               <h3 className="text-sm font-bold text-gray-900 mb-3">{variant.name}</h3>
@@ -157,13 +181,50 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                     <div 
                       key={option}
                       onClick={() => handleVariantSelect(variant.name, option)}
-                      className={`relative cursor-pointer px-4 py-2 border rounded-md text-sm font-medium transition-all ${
+                      className={`relative flex-1 min-w-[100px] text-center cursor-pointer px-4 py-2 border rounded-md text-sm font-medium transition-all ${
                         isSelected 
                           ? 'border-sky-500 bg-sky-50 text-sky-700 shadow-sm' 
                           : 'border-gray-300 text-gray-700 hover:border-gray-400 bg-white'
                       }`}
                     >
                       {option}
+                      {isSelected && (
+                        <div className="absolute -top-2 -right-2 bg-sky-500 text-white rounded-full p-0.5">
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+
+          {/* Dinamik Ürün Seçenekleri (Yeni Sistem) */}
+          {Array.isArray(product.options) && product.options.map((group: any) => (
+            <div key={group.title}>
+              <h3 className="text-sm font-bold text-gray-900 mb-3">{group.title}</h3>
+              <div className="flex flex-wrap gap-3">
+                {group.choices.map((choice: any) => {
+                  const isSelected = selectedDynamicOptions[group.title]?.name === choice.name;
+                  return (
+                    <div 
+                      key={choice.name}
+                      onClick={() => handleDynamicOptionSelect(group.title, choice)}
+                      className={`relative flex-1 min-w-[100px] text-center cursor-pointer px-4 py-2 border rounded-md text-sm font-medium transition-all ${
+                        isSelected 
+                          ? 'border-sky-500 bg-sky-50 text-sky-700 shadow-sm' 
+                          : 'border-gray-300 text-gray-700 hover:border-gray-400 bg-white'
+                      }`}
+                    >
+                      <div className="flex flex-col items-center justify-center h-full">
+                        <span className="leading-tight">{choice.name}</span>
+                        {choice.priceModifier > 0 && (
+                          <span className="text-[10px] text-green-600 font-bold mt-0.5 leading-none">
+                            +{choice.priceModifier} TL
+                          </span>
+                        )}
+                      </div>
                       {isSelected && (
                         <div className="absolute -top-2 -right-2 bg-sky-500 text-white rounded-full p-0.5">
                           <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>
@@ -186,7 +247,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                   return (
                     <div 
                       key={opt.quantity}
-                      onClick={() => handleQuantitySelect(opt.quantity, opt.price)}
+                      onClick={() => handleQuantitySelect(opt.quantity)}
                       className={`relative cursor-pointer p-3 border rounded-md transition-all flex justify-between items-center ${
                         isSelected 
                           ? 'border-sky-500 bg-sky-50 shadow-sm' 
@@ -233,7 +294,15 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                   <span className="font-medium text-gray-900">{value}</span>
                 </div>
               ))}
-              <div className="flex justify-between">
+              {Object.entries(selectedDynamicOptions).map(([key, value]) => (
+                <div key={key} className="flex justify-between">
+                  <span>{key}:</span>
+                  <span className="font-medium text-gray-900">
+                    {value.name} {value.priceModifier > 0 ? `(+${value.priceModifier} TL)` : ''}
+                  </span>
+                </div>
+              ))}
+              <div className="flex justify-between border-t border-gray-100 pt-3 mt-3">
                 <span>Adet:</span>
                 <span className="font-medium text-gray-900">{selectedQuantity}</span>
               </div>

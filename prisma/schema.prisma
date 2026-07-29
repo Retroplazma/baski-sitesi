@@ -43,6 +43,7 @@ model Product {
 
   variants        Json?
   quantityOptions Json?
+  options         Json?       @default("[]")
 
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt

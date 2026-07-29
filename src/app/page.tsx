@@ -97,7 +97,7 @@ export default async function HomePage() {
                 <p className="text-xs text-gray-500 mt-1 line-clamp-2">{product.description}</p>
                 <div className="mt-auto pt-2">
                   <p className="text-xl font-extrabold text-gray-900">
-                    {(Math.random() * 200 + 50).toLocaleString("tr-TR", { style: "currency", currency: "TRY" })}
+                    {(product.basePrice || 0).toLocaleString("tr-TR", { style: "currency", currency: "TRY" })}
                   </p>
                 </div>
               </div>

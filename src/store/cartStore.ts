@@ -2,29 +2,31 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 function calculatePrice(item: Omit<CartItem, 'price'>, quantity: number, customPrice?: number): number {
-  if (item.productId === 'pnp-custom' && customPrice !== undefined) {
-    return customPrice * quantity;
-  }
-
-  if (!item.quantityOptions || item.quantityOptions.length === 0) {
-    return (item.basePrice || 0) * quantity;
-  }
-
-  // Büyükten küçüğe sırala (Örn: 10, 5, 3, 1)
-  const sortedOptions = [...item.quantityOptions].sort((a, b) => b.quantity - a.quantity);
-
-  let remaining = quantity;
   let total = 0;
 
-  for (const opt of sortedOptions) {
-    if (remaining >= opt.quantity) {
-      const count = Math.floor(remaining / opt.quantity);
-      total += count * opt.price;
-      remaining -= count * opt.quantity;
+  if (item.productId === 'pnp-custom' && customPrice !== undefined) {
+    total = customPrice * quantity;
+  } else if (!item.quantityOptions || item.quantityOptions.length === 0) {
+    total = (item.basePrice || 0) * quantity;
+  } else {
+    // Büyükten küçüğe sırala (Örn: 10, 5, 3, 1)
+    const sortedOptions = [...item.quantityOptions].sort((a, b) => b.quantity - a.quantity);
+
+    let remaining = quantity;
+    for (const opt of sortedOptions) {
+      if (remaining >= opt.quantity) {
+        const count = Math.floor(remaining / opt.quantity);
+        total += count * opt.price;
+        remaining -= count * opt.quantity;
+      }
     }
   }
 
-  return total;
+  const modifiersSum = item.selectedOptions 
+    ? Object.values(item.selectedOptions).reduce((sum, opt) => sum + (opt.priceModifier || 0), 0)
+    : 0;
+
+  return total + (modifiersSum * quantity);
 }
 
 export interface CartItem {
@@ -39,6 +41,7 @@ export interface CartItem {
   basePrice?: number;
   quantityOptions?: { quantity: number; price: number }[];
   variants: Record<string, string>;
+  selectedOptions?: Record<string, {name: string, priceModifier: number}>;
 }
 
 interface CartState {

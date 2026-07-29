@@ -127,3 +127,24 @@ export async function seedMockProducts() {
     return { success: false, error: "Mock veriler eklenemedi." };
   }
 }
+
+export async function searchProducts(query: string) {
+  if (!query) return [];
+  try {
+    const products = await prisma.product.findMany({
+      where: {
+        isActive: true,
+        OR: [
+          { name: { contains: query, mode: "insensitive" } },
+          { description: { contains: query, mode: "insensitive" } },
+          { category: { contains: query, mode: "insensitive" } }
+        ]
+      },
+      orderBy: { createdAt: "desc" }
+    });
+    return products;
+  } catch (error) {
+    console.error("searchProducts error:", error);
+    return [];
+  }
+}

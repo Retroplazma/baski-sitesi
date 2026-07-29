@@ -28,15 +28,26 @@ export async function createOrder(customerData: any, cartItems: any[], totalAmou
         status: "PENDING",
         ...(userId ? { userId } : {}),
         orderItems: {
-          create: cartItems.map((item) => ({
-            productId: item.productId,
-            productName: item.name,
-            price: item.price,
-            quantity: item.quantity,
-            variants: item.variants || {},
-            customImage: item.customImage || null,
-            customImages: item.customImages || [],
-          }))
+          create: cartItems.map((item) => {
+            // Eski varyantlar ile yeni dinamik varyantları birleştir
+            const mergedVariants = { ...(item.variants || {}) };
+            
+            if (item.selectedOptions) {
+              Object.entries(item.selectedOptions).forEach(([k, v]: [string, any]) => {
+                mergedVariants[k] = `${v.name}${v.priceModifier ? ` (+${v.priceModifier} TL)` : ''}`;
+              });
+            }
+
+            return {
+              productId: item.productId,
+              productName: item.name,
+              price: item.price,
+              quantity: item.quantity,
+              variants: mergedVariants,
+              customImage: item.customImage || null,
+              customImages: item.customImages || [],
+            };
+          })
         }
       }
     });
