@@ -69,24 +69,45 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
                       Adet: {item.quantity} x {item.price.toLocaleString("tr-TR")} TL
                     </div>
                   </div>
-                  <div className="flex flex-col items-end gap-2">
-                    <span className="font-bold text-gray-900">
-                      {(item.price).toLocaleString("tr-TR")} TL
-                    </span>
-                    {item.customImage && item.customImage !== "https://via.placeholder.com/800x800.png?text=Musteri+Tasarimi" && (
-                      <a 
-                        href={item.customImage} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        download
-                        className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 bg-sky-50 text-sky-600 hover:bg-sky-100 hover:text-sky-700 rounded-md text-xs font-semibold transition-colors border border-sky-200"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                        Orijinal Tasarımı İndir
-                      </a>
-                    )}
+                    <div className="flex flex-col items-end gap-2">
+                      <span className="font-bold text-gray-900">
+                        {(item.price).toLocaleString("tr-TR")} TL
+                      </span>
+                      
+                      {/* Tek resim için geriye dönük uyumluluk veya customImages boş ise */}
+                      {item.customImage && (!item.customImages || item.customImages.length === 0) && item.customImage !== "https://via.placeholder.com/800x800.png?text=Musteri+Tasarimi" && (
+                        <a 
+                          href={item.customImage} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          download
+                          className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 bg-sky-50 text-sky-600 hover:bg-sky-100 hover:text-sky-700 rounded-md text-xs font-semibold transition-colors border border-sky-200"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                          Tasarımı İndir
+                        </a>
+                      )}
+
+                      {/* Çoklu resimler için */}
+                      {item.customImages && item.customImages.length > 0 && (
+                        <div className="flex flex-col gap-2 mt-2">
+                          {item.customImages.map((imgUrl: string, idx: number) => (
+                            <a 
+                              key={idx}
+                              href={imgUrl} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              download
+                              className="inline-flex items-center justify-end gap-1.5 px-3 py-1.5 bg-sky-50 text-sky-600 hover:bg-sky-100 hover:text-sky-700 rounded-md text-xs font-semibold transition-colors border border-sky-200"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                              Tasarım {idx + 1} İndir
+                            </a>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
               ))}
             </div>
             <div className="bg-gray-50 p-5 flex justify-between items-center border-t border-gray-200">

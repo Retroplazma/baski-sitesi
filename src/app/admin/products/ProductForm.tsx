@@ -16,6 +16,7 @@ const productSchema = z.object({
   category: z.string().min(2, "Kategori adı çok kısa"),
   isCustomizable: z.boolean(),
   isActive: z.boolean(),
+  allowMultipleDesigns: z.boolean(),
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -41,6 +42,7 @@ export default function ProductForm({
       category: product?.category || "",
       isCustomizable: product?.isCustomizable ?? true,
       isActive: product?.isActive ?? true,
+      allowMultipleDesigns: product?.allowMultipleDesigns ?? false,
     }
   });
 
@@ -92,7 +94,10 @@ export default function ProductForm({
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Kapak Görseli</label>
               <div className="border border-gray-200 rounded-xl overflow-hidden">
-                <ImageUploader onUploadSuccess={setImageUrl} onClear={() => setImageUrl("")} />
+                <ImageUploader 
+                  onUploadSuccess={(urls) => setImageUrl(Array.isArray(urls) ? urls[0] : urls)} 
+                  onClear={() => setImageUrl("")} 
+                />
               </div>
               {imageUrl && (
                 <div className="mt-3 flex items-center gap-3 p-2 border border-emerald-200 bg-emerald-50 rounded-lg">
@@ -152,6 +157,11 @@ export default function ProductForm({
                 <label className="flex items-center gap-3 cursor-pointer">
                   <input {...register("isCustomizable")} type="checkbox" className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
                   <span className="text-sm font-medium text-gray-700">Müşteri Görsel Yükleyebilir</span>
+                </label>
+                
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input {...register("allowMultipleDesigns")} type="checkbox" className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                  <span className="text-sm font-medium text-gray-700">Çoklu Tasarım Yüklemeye İzin Ver</span>
                 </label>
               </div>
             </div>

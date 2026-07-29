@@ -24,6 +24,7 @@ export interface Product {
   basePrice?: number;
   variants?: Variant[];
   quantityOptions?: QuantityOption[];
+  allowMultipleDesigns?: boolean;
 }
 
 export const CATEGORIES: Category[] = [

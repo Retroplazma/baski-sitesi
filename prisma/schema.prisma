@@ -39,6 +39,7 @@ model Product {
   isActive        Boolean     @default(true)
   isPopular       Boolean     @default(false)
   isNew           Boolean     @default(false)
+  allowMultipleDesigns Boolean @default(false)
 
   variants        Json?
   quantityOptions Json?
@@ -103,4 +104,5 @@ model OrderItem {
   
   variants       Json?
   customImage    String?
+  customImages   String[] @default([])
 }

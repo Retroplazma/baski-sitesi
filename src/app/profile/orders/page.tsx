@@ -75,9 +75,20 @@ export default function OrdersPage() {
               <div className="p-4 bg-white divide-y divide-gray-100">
                 {order.orderItems?.map((item: any) => (
                   <div key={item.id} className="py-3 first:pt-0 last:pb-0 flex items-center gap-4">
-                    <div className="w-16 h-16 bg-gray-100 rounded-md flex-shrink-0 flex items-center justify-center overflow-hidden">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={item.customImage || '/placeholder.svg'} alt={item.productName} className="w-full h-full object-contain" />
+                    <div className="flex gap-2">
+                      {item.customImages && item.customImages.length > 0 ? (
+                        item.customImages.map((img: string, idx: number) => (
+                          <div key={idx} className="w-16 h-16 bg-gray-100 rounded-md flex-shrink-0 flex items-center justify-center overflow-hidden">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={img || '/placeholder.svg'} alt={`${item.productName} - ${idx}`} className="w-full h-full object-contain" />
+                          </div>
+                        ))
+                      ) : (
+                        <div className="w-16 h-16 bg-gray-100 rounded-md flex-shrink-0 flex items-center justify-center overflow-hidden">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={item.customImage || '/placeholder.svg'} alt={item.productName} className="w-full h-full object-contain" />
+                        </div>
+                      )}
                     </div>
                     <div className="flex-1">
                       <h4 className="text-sm font-medium text-gray-900">{item.productName}</h4>

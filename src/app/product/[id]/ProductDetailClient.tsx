@@ -9,7 +9,7 @@ import ImageUploader from "@/components/ImageUploader";
 
 export default function ProductDetailClient({ initialProduct }: { initialProduct: Product }) {
   const [product, setProduct] = useState<Product>(initialProduct);
-  const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
+  const [uploadedUrls, setUploadedUrls] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("about");
   
@@ -54,7 +54,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
   const handleCheckout = async () => {
     if (!product) return;
     
-    if (!uploadedUrl) {
+    if (uploadedUrls.length === 0) {
       alert("Lütfen basılmasını istediğiniz görseli yükleyin.");
       return;
     }
@@ -72,7 +72,8 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
       name: product.name,
       price: totalPrice,
       quantity: selectedQuantity,
-      customImage: uploadedUrl,
+      customImage: uploadedUrls[0],
+      customImages: uploadedUrls,
       variants: selectedVariants,
       basePrice: product.basePrice,
       quantityOptions: product.quantityOptions
@@ -213,8 +214,9 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
 
           {/* Tasarım Yükleme Alanı */}
           <ImageUploader 
-            onUploadSuccess={(url) => setUploadedUrl(url)} 
-            onClear={() => setUploadedUrl(null)} 
+            allowMultiple={product.allowMultipleDesigns}
+            onUploadSuccess={(urls) => setUploadedUrls(Array.isArray(urls) ? urls : [urls])} 
+            onClear={() => setUploadedUrls([])} 
           />
 
         </div>
@@ -246,7 +248,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
 
             <button
               onClick={handleCheckout}
-              disabled={loading || !uploadedUrl}
+              disabled={loading || uploadedUrls.length === 0}
               className="w-full flex justify-center items-center py-4 px-4 rounded-lg shadow-sm text-lg font-bold text-white bg-sky-500 hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all mb-4"
             >
               {loading ? (

@@ -35,6 +35,7 @@ export async function createOrder(customerData: any, cartItems: any[], totalAmou
             quantity: item.quantity,
             variants: item.variants || {},
             customImage: item.customImage || null,
+            customImages: item.customImages || [],
           }))
         }
       }

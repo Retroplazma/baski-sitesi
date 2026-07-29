@@ -88,11 +88,8 @@ export default function PnpUploader({ onUploadSuccess, onClear }: PnpUploaderPro
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      // Sadece ilk dosyayı al, gerekirse çoklu seçimi mapleyebilirsin
-      // Ancak "Fazladan dosya ekle" butonu ile de tek tek eklenebilir. Çoklu seçime izin verebiliriz.
-      Array.from(e.target.files).forEach(file => handleFile(file));
+      handleFile(e.target.files[0]);
     }
-    // Seçimden sonra temizle ki aynı dosyayı tekrar seçebilsin
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -101,7 +98,7 @@ export default function PnpUploader({ onUploadSuccess, onClear }: PnpUploaderPro
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      Array.from(e.dataTransfer.files).forEach(file => handleFile(file));
+      handleFile(e.dataTransfer.files[0]);
     }
   };
 
@@ -168,29 +165,30 @@ export default function PnpUploader({ onUploadSuccess, onClear }: PnpUploaderPro
         ))}
       </div>
 
-      <div
-        onClick={() => fileInputRef.current?.click()}
-        onDrop={handleDrop}
-        onDragOver={handleDragOver}
-        className="flex flex-col justify-center items-center border-2 border-dashed border-gray-300 rounded-lg p-6 text-center bg-gray-50 hover:bg-orange-50 hover:border-orange-400 transition-colors cursor-pointer group"
-      >
-        <div className="bg-white p-3 rounded-full shadow-sm mb-3 group-hover:scale-110 transition-transform">
-          <svg className="h-6 w-6 text-orange-500" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+      {!uploadedFiles.length && (
+        <div
+          onClick={() => fileInputRef.current?.click()}
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+          className="flex flex-col justify-center items-center border-2 border-dashed border-gray-300 rounded-lg p-6 text-center bg-gray-50 hover:bg-orange-50 hover:border-orange-400 transition-colors cursor-pointer group"
+        >
+          <div className="bg-white p-3 rounded-full shadow-sm mb-3 group-hover:scale-110 transition-transform">
+            <svg className="h-6 w-6 text-orange-500" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+              <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+          <div className="text-sm text-gray-800 font-bold mb-1">
+            Dosyanızı sürükleyin veya göz atın
+          </div>
+          <p className="text-xs text-gray-500">
+            Desteklenen formatlar: PDF, PNG, JPG, STL, OBJ (Max 50MB)
+          </p>
         </div>
-        <div className="text-sm text-gray-800 font-bold mb-1">
-          {uploadedFiles.length > 0 ? "Fazladan Dosya Ekle" : "Dosyanızı sürükleyin veya göz atın"}
-        </div>
-        <p className="text-xs text-gray-500">
-          Desteklenen formatlar: PDF, PNG, JPG, STL, OBJ (Max 50MB)
-        </p>
-      </div>
+      )}
 
       <input
         ref={fileInputRef}
         type="file"
-        multiple
         accept="image/jpeg,image/png,image/jpg,application/pdf,.stl,.obj"
         onChange={handleFileChange}
         className="hidden"

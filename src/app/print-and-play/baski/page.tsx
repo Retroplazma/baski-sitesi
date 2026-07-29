@@ -79,7 +79,7 @@ export default function PnpPrintPage() {
         'Kağıt': paper === 'MATTE' ? 'Mat' : 'Parlak',
         'Yüzey': surface === 'CELLOPHANE' ? 'Selefonlu' : 'Selefonsuz',
         'Baskı Yönü': type === 'CARD' ? (printSide === 'SINGLE' ? 'Tek Yönlü' : 'Arkalı Önlü') : '-',
-        'Hesaplanan Yaprak': calculateSheets().toString(),
+        'Hesaplanan Tabaka': calculateSheets().toString(),
         'Tespit Edilen Sayfa': totalDetectedPages.toString(),
         'Kopya Sayısı': copies.toString()
       }
@@ -241,13 +241,29 @@ export default function PnpPrintPage() {
                   <span className="font-semibold text-gray-900">{totalDetectedPages}</span>
                 </div>
                 <div className="flex justify-between text-gray-600">
-                  <span>Hesaplanan Yaprak:</span>
-                  <span className="font-semibold text-orange-600">{calculateSheets()} Yaprak</span>
+                  <span>Hesaplanan Tabaka:</span>
+                  <span className="font-semibold text-orange-600">{calculateSheets()} Tabaka</span>
                 </div>
                 <div className="flex justify-between text-gray-600">
                   <span>Kopya Sayısı:</span>
                   <span className="font-semibold text-gray-900">{copies} Adet</span>
                 </div>
+                {prices && (
+                  <div className="flex justify-between text-gray-600">
+                    <span>Birim Fiyat:</span>
+                    <span className="font-semibold text-gray-900">
+                      {(() => {
+                        const currentPrice = type === 'CARD' ? prices.card : prices.sticker;
+                        let totalPerSheet = currentPrice.basePrice;
+                        totalPerSheet += currentPrice.glossyMatteExtra;
+                        if (surface === 'CELLOPHANE') {
+                          totalPerSheet += currentPrice.cellophaneExtra;
+                        }
+                        return `${totalPerSheet.toLocaleString("tr-TR")} TL (${type === 'CARD' ? 'Tabaka' : 'Sticker'})`;
+                      })()}
+                    </span>
+                  </div>
+                )}
               </div>
 
               <div className="flex justify-between items-end mb-6">

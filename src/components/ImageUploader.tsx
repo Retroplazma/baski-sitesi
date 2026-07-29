@@ -5,15 +5,15 @@ import { v4 as uuidv4 } from "uuid";
 import { supabase } from "@/lib/supabaseClient";
 
 interface ImageUploaderProps {
-  onUploadSuccess: (url: string) => void;
+  allowMultiple?: boolean;
+  onUploadSuccess: (urls: string | string[]) => void;
   onClear: () => void;
 }
 
-export default function ImageUploader({ onUploadSuccess, onClear }: ImageUploaderProps) {
+export default function ImageUploader({ allowMultiple = false, onUploadSuccess, onClear }: ImageUploaderProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [uploadedFiles, setUploadedFiles] = useState<{name: string, url: string, preview: string | null}[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFile = async (file: File) => {
@@ -32,7 +32,6 @@ export default function ImageUploader({ onUploadSuccess, onClear }: ImageUploade
     }
 
     setLoading(true);
-    setSelectedFileName(file.name);
 
     try {
       // Benzersiz dosya ismi oluştur
@@ -53,17 +52,30 @@ export default function ImageUploader({ onUploadSuccess, onClear }: ImageUploade
         .from('print-uploads')
         .getPublicUrl(fileName);
 
+      let preview = null;
       if (file.type.startsWith('image/')) {
-        setPreviewUrl(URL.createObjectURL(file));
+        preview = URL.createObjectURL(file);
       } else {
-        setPreviewUrl('/placeholder.svg'); // PDF için genel ikon gösterilebilir
+        preview = '/placeholder.svg'; // PDF için genel ikon gösterilebilir
       }
 
-      onUploadSuccess(publicUrl);
+      let newFiles = uploadedFiles;
+      if (allowMultiple) {
+        newFiles = [...uploadedFiles, { name: file.name, url: publicUrl, preview }];
+      } else {
+        newFiles = [{ name: file.name, url: publicUrl, preview }];
+      }
+      
+      setUploadedFiles(newFiles);
+
+      if (allowMultiple) {
+        onUploadSuccess(newFiles.map(f => f.url));
+      } else {
+        onUploadSuccess(publicUrl);
+      }
     } catch (err: any) {
       console.error("Upload error:", err);
       setError("Dosya yüklenirken bir hata oluştu. Lütfen tekrar deneyin.");
-      setSelectedFileName(null);
     } finally {
       setLoading(false);
     }
@@ -71,14 +83,25 @@ export default function ImageUploader({ onUploadSuccess, onClear }: ImageUploade
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      handleFile(e.target.files[0]);
+      if (allowMultiple) {
+        Array.from(e.target.files).forEach(file => handleFile(file));
+      } else {
+        handleFile(e.target.files[0]);
+      }
+    }
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
   };
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      handleFile(e.dataTransfer.files[0]);
+      if (allowMultiple) {
+        Array.from(e.dataTransfer.files).forEach(file => handleFile(file));
+      } else {
+        handleFile(e.dataTransfer.files[0]);
+      }
     }
   };
 
@@ -86,14 +109,19 @@ export default function ImageUploader({ onUploadSuccess, onClear }: ImageUploade
     e.preventDefault();
   };
 
-  const handleClearFile = () => {
-    setSelectedFileName(null);
-    setPreviewUrl(null);
-    setError(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+  const handleRemoveFile = (indexToRemove: number) => {
+    const newFiles = uploadedFiles.filter((_, idx) => idx !== indexToRemove);
+    setUploadedFiles(newFiles);
+    
+    if (newFiles.length === 0) {
+      onClear();
+    } else {
+      if (allowMultiple) {
+        onUploadSuccess(newFiles.map(f => f.url));
+      } else {
+        onUploadSuccess(newFiles[0].url);
+      }
     }
-    onClear();
   };
 
   return (
@@ -114,44 +142,75 @@ export default function ImageUploader({ onUploadSuccess, onClear }: ImageUploade
           </svg>
           <p className="text-sm text-gray-600 font-medium">Dosyanız yükleniyor, lütfen bekleyin...</p>
         </div>
-      ) : !selectedFileName ? (
-        <div
-          onClick={() => fileInputRef.current?.click()}
-          onDrop={handleDrop}
-          onDragOver={handleDragOver}
-          className="flex flex-col justify-center items-center border-2 border-dashed border-gray-300 rounded-lg p-10 text-center bg-gray-50 hover:bg-sky-50 hover:border-sky-400 transition-colors cursor-pointer group"
-        >
-          <div className="bg-white p-4 rounded-full shadow-sm mb-4 group-hover:scale-110 transition-transform">
-            <svg className="h-8 w-8 text-sky-500" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-              <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </div>
-          <div className="text-base text-gray-800 font-bold mb-1">
-            Dosyanızı sürükleyin veya <span className="text-sky-500 underline">göz atın</span>
-          </div>
-          <p className="text-xs text-gray-500 mt-1">
-            Desteklenen formatlar: PDF, PNG, JPG (Max 15MB)
-          </p>
+      ) : uploadedFiles.length === 0 || allowMultiple ? (
+        <div className="space-y-4">
+          {uploadedFiles.map((file, idx) => (
+            <div key={idx} className="relative border border-gray-200 rounded-lg p-4 bg-gray-50 shadow-sm">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2 overflow-hidden">
+                  <svg className="w-5 h-5 text-green-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                  <span className="text-sm font-medium text-gray-700 truncate">{file.name}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); handleRemoveFile(idx); }}
+                  className="text-gray-400 hover:text-red-500 bg-white p-1 rounded-md border border-gray-200 transition-colors focus:outline-none"
+                  title="Dosyayı Kaldır"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+              </div>
+              {file.preview && file.preview !== '/placeholder.svg' && (
+                <div className="relative rounded-md overflow-hidden bg-white border border-gray-200 flex justify-center items-center h-24">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={file.preview} alt="Preview" className="object-contain w-full h-full" />
+                </div>
+              )}
+            </div>
+          ))}
+
+          {(!uploadedFiles.length || allowMultiple) && (
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              onDrop={handleDrop}
+              onDragOver={handleDragOver}
+              className="flex flex-col justify-center items-center border-2 border-dashed border-gray-300 rounded-lg p-10 text-center bg-gray-50 hover:bg-sky-50 hover:border-sky-400 transition-colors cursor-pointer group"
+            >
+              <div className="bg-white p-4 rounded-full shadow-sm mb-4 group-hover:scale-110 transition-transform">
+                <svg className="h-8 w-8 text-sky-500" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                  <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+              <div className="text-base text-gray-800 font-bold mb-1">
+                {uploadedFiles.length > 0 ? "Yeni Dosya Ekle veya " : "Dosyanızı sürükleyin veya "}
+                <span className="text-sky-500 underline">göz atın</span>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                Desteklenen formatlar: PDF, PNG, JPG (Max 15MB)
+              </p>
+            </div>
+          )}
         </div>
       ) : (
         <div className="relative border border-gray-200 rounded-lg p-4 bg-gray-50 shadow-sm">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2 overflow-hidden">
               <svg className="w-5 h-5 text-green-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-              <span className="text-sm font-medium text-gray-700 truncate">{selectedFileName}</span>
+              <span className="text-sm font-medium text-gray-700 truncate">{uploadedFiles[0].name}</span>
             </div>
             <button
-              onClick={handleClearFile}
+              type="button"
+              onClick={(e) => { e.stopPropagation(); handleRemoveFile(0); }}
               className="text-gray-400 hover:text-red-500 bg-white p-1 rounded-md border border-gray-200 transition-colors focus:outline-none"
               title="Dosyayı Kaldır"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
           </div>
-          {previewUrl && previewUrl !== '/placeholder.svg' && (
+          {uploadedFiles[0].preview && uploadedFiles[0].preview !== '/placeholder.svg' && (
             <div className="relative rounded-md overflow-hidden bg-white border border-gray-200 flex justify-center items-center h-48">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={previewUrl} alt="Preview" className="object-contain w-full h-full" />
+              <img src={uploadedFiles[0].preview} alt="Preview" className="object-contain w-full h-full" />
             </div>
           )}
         </div>
@@ -160,6 +219,7 @@ export default function ImageUploader({ onUploadSuccess, onClear }: ImageUploade
         ref={fileInputRef}
         type="file"
         accept="image/jpeg,image/png,image/jpg,application/pdf"
+        multiple={allowMultiple}
         onChange={handleFileChange}
         className="hidden"
       />

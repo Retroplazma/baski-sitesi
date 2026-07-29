@@ -34,6 +34,7 @@ export interface CartItem {
   price: number;
   quantity: number;
   customImage: string | null;
+  customImages?: string[];
   productImage?: string;
   basePrice?: number;
   quantityOptions?: { quantity: number; price: number }[];
