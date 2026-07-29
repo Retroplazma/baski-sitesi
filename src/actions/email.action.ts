@@ -182,3 +182,33 @@ export async function sendQuoteRequestCustomerEmail(
     return { success: false, error };
   }
 }
+
+export async function sendWelcomeEmail(userEmail: string, firstName: string) {
+  try {
+    const htmlContent = `
+      <div style="font-family: sans-serif; max-w-xl mx-auto p-4 border rounded shadow-sm">
+        <h2 style="color: #00008F;">Aramıza Hoş Geldiniz! 🎉</h2>
+        <p>Merhaba ${firstName},</p>
+        <p>Baskı Atölyesi'ne başarıyla kayıt oldunuz. Sizi aramızda görmekten mutluluk duyuyoruz.</p>
+        
+        <p>Platformumuz üzerinden 3 boyutlu baskı siparişlerinizi verebilir, projelerinizi hayata geçirebilirsiniz.</p>
+        
+        <p style="margin-top: 30px; font-size: 0.9em; color: #666;">Baskı Atölyesi Ekibi</p>
+      </div>
+    `;
+
+    const data = await resend.emails.send({
+      from: 'Baskı Atölyesi <destek@baski-atolyesi.com>',
+      to: [userEmail],
+      subject: 'Aramıza Hoş Geldiniz!',
+      html: htmlContent,
+    });
+
+    console.log("Welcome email sent:", data);
+    return { success: true, data };
+  } catch (error) {
+    console.error("Error sending welcome email:", error);
+    return { success: false, error };
+  }
+}
+

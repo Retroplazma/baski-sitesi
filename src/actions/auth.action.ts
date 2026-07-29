@@ -59,3 +59,31 @@ export async function forgotPassword(email: string) {
   }
 }
 
+export async function resetPasswordWithToken(token: string, newPassword: string) {
+  try {
+    // 1. Verify token
+    const secret = process.env.JWT_SECRET || process.env.NEXTAUTH_SECRET || "fallback_secret";
+    let decoded: any;
+    try {
+      decoded = jwt.verify(token, secret);
+    } catch (err) {
+      return { success: false, message: "Geçersiz veya süresi dolmuş bağlantı." };
+    }
+
+    const { email } = decoded;
+
+    // 2. Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // 3. Update user
+    await prisma.user.update({
+      where: { email },
+      data: { password: hashedPassword },
+    });
+
+    return { success: true, message: "Şifreniz başarıyla güncellendi." };
+  } catch (error) {
+    console.error("Reset password error:", error);
+    return { success: false, message: "Şifre sıfırlanırken bir hata oluştu." };
+  }
+}

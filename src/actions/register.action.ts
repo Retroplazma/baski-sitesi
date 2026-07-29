@@ -3,6 +3,7 @@
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
+import { sendWelcomeEmail } from "./email.action";
 
 const registerSchema = z.object({
   name: z.string().min(2, "Ad Soyad en az 2 karakter olmalıdır"),
@@ -46,6 +47,9 @@ export async function registerUser(formData: z.infer<typeof registerSchema>) {
         role: "USER",
       },
     });
+
+    // 5. Send welcome email (fire and forget so it doesn't block)
+    sendWelcomeEmail(email, name).catch(console.error);
 
     return { success: true };
   } catch (error) {
