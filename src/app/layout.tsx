@@ -7,12 +7,18 @@ import CartDrawer from '@/components/CartDrawer';
 import CheckoutAuthModal from '@/components/CheckoutAuthModal';
 import HeaderLoginButton from '@/components/HeaderLoginButton';
 import { AuthProvider } from '@/providers/AuthProvider';
+import Image from 'next/image';
+import { Info, ChevronDown } from 'lucide-react';
+import { CATEGORIES } from '@/data/products';
 
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'Baskı Atölyesi',
   description: 'Tasarımını yükle, kapına gelsin.',
+  icons: {
+    icon: '/favicon.svg',
+  },
 };
 
 export default function RootLayout({
@@ -25,12 +31,19 @@ export default function RootLayout({
       <body className={`${inter.className} bg-gray-50 text-gray-800 flex flex-col min-h-screen`}>
         <AuthProvider>
           {/* Header */}
-        <header className="bg-white shadow-sm sticky top-0 z-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-8">
+        <header className="bg-white shadow-sm relative z-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between gap-8">
             {/* Logo */}
-            <div className="flex-shrink-0">
-              <Link href="/" className="text-2xl font-black text-orange-500 tracking-tight">
-                Baskı Atölyesi
+            <div className="flex-shrink-0 flex items-center w-[300px] -ml-6 mr-4">
+              <Link href="/" className="flex items-center">
+                <Image 
+                  src="/logo.svg" 
+                  alt="Baskı Atölyesi" 
+                  width={300} 
+                  height={90} 
+                  className="h-24 w-auto scale-[2.5] origin-left"
+                  priority 
+                />
               </Link>
             </div>
             {/* Search */}
@@ -48,10 +61,75 @@ export default function RootLayout({
                 </div>
               </div>
             </div>
+            
             {/* Actions */}
             <div className="flex items-center gap-6">
+              <Link 
+                href="/nasil-siparis-verilir" 
+                className="hidden lg:flex flex-col items-center text-gray-600 hover:text-orange-500 transition-colors"
+              >
+                <Info className="w-6 h-6 mb-1" />
+                <span className="text-xs font-medium whitespace-nowrap">Sipariş Rehberi</span>
+              </Link>
               <HeaderLoginButton />
               <HeaderCartButton />
+            </div>
+          </div>
+
+          {/* Secondary Header - Categories */}
+          <div className="bg-white border-b border-gray-100 shadow-sm relative z-40">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <ul className="flex items-center justify-start space-x-6">
+                <li className="relative group z-50">
+                  <button className="flex items-center gap-1 text-slate-800 font-bold text-sm px-2 py-2 hover:text-orange-500 transition-colors cursor-default">
+                    Tüm Kategoriler
+                    <ChevronDown className="w-4 h-4 group-hover:rotate-180 transition-transform" />
+                  </button>
+                  {/* Dropdown Content */}
+                  <div className="absolute left-0 top-full w-[600px] bg-white shadow-2xl rounded-b-xl border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 p-4 grid grid-cols-2 gap-2">
+                    {CATEGORIES.map(category => (
+                      <Link 
+                        key={category.slug} 
+                        href={`/urunlerimiz/${category.slug}`}
+                        className="flex items-center p-3 rounded-lg hover:bg-orange-50 group/item transition-colors"
+                      >
+                        <div className="w-2 h-2 rounded-full bg-orange-200 mr-3 group-hover/item:bg-orange-500 transition-colors"></div>
+                        <span className="font-semibold text-gray-700 group-hover/item:text-orange-700">{category.name}</span>
+                      </Link>
+                    ))}
+                    <Link 
+                      href="/urunlerimiz"
+                      className="flex items-center p-3 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors col-span-2 justify-center mt-2"
+                    >
+                      <span className="font-bold text-slate-700">Tüm Ürünleri Gör &rarr;</span>
+                    </Link>
+                  </div>
+                </li>
+                <li>
+                  <Link 
+                    href="/yeni-urunler"
+                    className="block px-2 py-2 text-sm font-semibold text-slate-600 hover:text-orange-500 transition-colors whitespace-nowrap"
+                  >
+                    Yeni Ürünler
+                  </Link>
+                </li>
+                <li>
+                  <Link 
+                    href="/urunlerimiz"
+                    className="block px-2 py-2 text-sm font-semibold text-slate-600 hover:text-orange-500 transition-colors whitespace-nowrap"
+                  >
+                    Popüler Ürünler
+                  </Link>
+                </li>
+                <li>
+                  <Link 
+                    href="/print-and-play"
+                    className="block px-2 py-2 text-sm font-semibold text-slate-600 hover:text-orange-500 transition-colors whitespace-nowrap"
+                  >
+                    PNP Baskı
+                  </Link>
+                </li>
+              </ul>
             </div>
           </div>
         </header>

@@ -212,3 +212,70 @@ export async function sendWelcomeEmail(userEmail: string, firstName: string) {
   }
 }
 
+export async function sendDesignApprovalEmail(userEmail: string, orderNumber: string, notes: string, firstName: string) {
+  try {
+    const htmlContent = `
+      <div style="font-family: sans-serif; max-w-xl mx-auto p-4 border rounded shadow-sm">
+        <h2 style="color: #f97316;">Tasarımınız Onayınızı Bekliyor</h2>
+        <p>Merhaba ${firstName},</p>
+        <p><strong>#${orderNumber}</strong> numaralı siparişiniz için yüklediğiniz tasarım ekibimiz tarafından incelendi.</p>
+        
+        <div style="background-color: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin: 20px 0;">
+          <h4 style="margin-top: 0;">Admin Notu:</h4>
+          <p style="margin-bottom: 0;">${notes || 'Tasarımla ilgili özel bir not eklenmedi, lütfen kontrol edip onaylayın.'}</p>
+        </div>
+        
+        <p>Lütfen kullanıcı panelinize giriş yaparak Siparişlerim bölümünden tasarımı onaylayın. Siz onay verene kadar ürün baskıya alınmayacaktır.</p>
+        
+        <p style="margin-top: 30px; font-size: 0.9em; color: #666;">Baskı Atölyesi Ekibi</p>
+      </div>
+    `;
+
+    const data = await resend.emails.send({
+      from: 'Baskı Atölyesi <siparis@baski-atolyesi.com>',
+      to: [userEmail],
+      subject: `Tasarım Onayı Bekleniyor - #${orderNumber}`,
+      html: htmlContent,
+    });
+
+    console.log("Design approval email sent:", data);
+    return { success: true, data };
+  } catch (error) {
+    console.error("Error sending design approval email:", error);
+    return { success: false, error };
+  }
+}
+
+export async function sendDesignRejectedEmail(userEmail: string, orderNumber: string, notes: string, firstName: string) {
+  try {
+    const htmlContent = `
+      <div style="font-family: sans-serif; max-w-xl mx-auto p-4 border rounded shadow-sm">
+        <h2 style="color: #dc2626;">Tasarımınız Baskıya Uygun Bulunmadı</h2>
+        <p>Merhaba ${firstName},</p>
+        <p><strong>#${orderNumber}</strong> numaralı siparişiniz için yüklediğiniz tasarım maalesef baskıya uygun bulunmadığı için reddedilmiştir.</p>
+        
+        <div style="background-color: #fee2e2; padding: 15px; border-left: 4px solid #ef4444; margin: 20px 0;">
+          <h4 style="margin-top: 0; color: #991b1b;">Reddedilme Sebebi:</h4>
+          <p style="margin-bottom: 0; color: #7f1d1d;">${notes || 'Baskı kalitesi veya format uygunsuzluğu.'}</p>
+        </div>
+        
+        <p>Ödediğiniz ücretin iade süreci başlatılacaktır. Anlayışınız için teşekkür ederiz.</p>
+        
+        <p style="margin-top: 30px; font-size: 0.9em; color: #666;">Baskı Atölyesi Ekibi</p>
+      </div>
+    `;
+
+    const data = await resend.emails.send({
+      from: 'Baskı Atölyesi <siparis@baski-atolyesi.com>',
+      to: [userEmail],
+      subject: `Tasarımınız Reddedildi - #${orderNumber}`,
+      html: htmlContent,
+    });
+
+    console.log("Design rejected email sent:", data);
+    return { success: true, data };
+  } catch (error) {
+    console.error("Error sending design rejected email:", error);
+    return { success: false, error };
+  }
+}

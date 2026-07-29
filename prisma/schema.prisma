@@ -66,6 +66,11 @@ model Order {
   status             String        @default("PENDING")
   paymentStatus      String        @default("PENDING")
   
+  designStatus       String        @default("PENDING") // PENDING, WAITING_USER_APPROVAL, APPROVED, REJECTED
+  adminDesignNotes   String?       @db.Text
+  userApprovedAt     DateTime?
+
+  
   userId             String?
   user               User?         @relation(fields: [userId], references: [id])
 

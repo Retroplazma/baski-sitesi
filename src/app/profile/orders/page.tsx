@@ -3,7 +3,65 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { getUserOrders } from "@/actions/profile.action";
+import { approveDesignByUser } from "@/actions/order.action";
 import Link from "next/link";
+
+function OrderDesignApproval({ order, onApproved }: { order: any, onApproved: () => void }) {
+  const [isChecked, setIsChecked] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  if (order.designStatus === "APPROVED") {
+    return (
+      <div className="bg-green-50 px-4 py-3 border-t border-green-200 text-green-800 text-sm font-medium">
+        Tasarım onaylandı ve baskıya alındı.
+      </div>
+    );
+  }
+
+  if (order.designStatus !== "WAITING_USER_APPROVAL") return null;
+
+  const handleApprove = async () => {
+    setIsSubmitting(true);
+    const res = await approveDesignByUser(order.id);
+    if (res.success) {
+      alert("Tasarım onaylandı!");
+      onApproved();
+    } else {
+      alert("Hata: " + res.message);
+    }
+    setIsSubmitting(false);
+  };
+
+  return (
+    <div className="bg-yellow-50 border-t border-yellow-200 p-4">
+      <h3 className="font-bold text-yellow-900 mb-2">Tasarım Onayınız Bekleniyor</h3>
+      <div className="bg-white p-3 rounded-md text-sm text-gray-700 mb-3 border border-yellow-100">
+        <span className="font-semibold text-yellow-800">Admin Notu: </span>
+        {order.adminDesignNotes || "Özel bir not bulunmuyor."}
+      </div>
+      
+      <label className="flex items-start gap-2 cursor-pointer mb-4">
+        <input 
+          type="checkbox" 
+          checked={isChecked}
+          onChange={(e) => setIsChecked(e.target.checked)}
+          className="mt-1 w-4 h-4 text-sky-600 rounded border-gray-300 focus:ring-sky-500"
+        />
+        <span className="text-sm text-gray-700">
+          Yukarıdaki açıklamaları okudum, tasarımın bu haliyle basılmasını onaylıyorum.
+        </span>
+      </label>
+
+      <button
+        disabled={!isChecked || isSubmitting}
+        onClick={handleApprove}
+        className="w-full sm:w-auto px-6 py-2 bg-sky-600 hover:bg-sky-700 disabled:bg-gray-400 text-white font-bold rounded-lg transition-colors"
+      >
+        {isSubmitting ? "Onaylanıyor..." : "Tasarımı Onayla ve Baskıya Gönder"}
+      </button>
+    </div>
+  );
+}
 
 export default function OrdersPage() {
   const { data: session } = useSession();
@@ -100,6 +158,16 @@ export default function OrdersPage() {
                   </div>
                 ))}
               </div>
+              
+              <OrderDesignApproval 
+                order={order} 
+                onApproved={() => {
+                  // Reload orders to reflect changes
+                  getUserOrders(session?.user?.id as string).then(res => {
+                    if(res.success && res.data) setOrders(res.data);
+                  });
+                }} 
+              />
             </div>
           ))}
         </div>

@@ -78,3 +78,78 @@ export async function updateOrderStatus(orderId: string, newStatus: string) {
   }
 }
 
+export async function sendToUserForApproval(orderId: string, notes: string) {
+  try {
+    const order = await prisma.order.update({
+      where: { id: orderId },
+      data: {
+        designStatus: "WAITING_USER_APPROVAL",
+        adminDesignNotes: notes
+      }
+    });
+
+    const { sendDesignApprovalEmail } = await import("@/actions/email.action");
+    sendDesignApprovalEmail(order.email, order.orderNumber, notes, order.firstName)
+      .catch(e => console.error("Tasarım onay maili gönderme hatası:", e));
+
+    revalidatePath("/admin/orders");
+    revalidatePath(`/admin/orders/${orderId}`);
+
+    return { success: true, message: "Müşteriye onay talebi gönderildi." };
+  } catch (error: any) {
+    console.error("Send to user for approval error:", error);
+    return { success: false, message: error.message || String(error) };
+  }
+}
+
+export async function rejectDesign(orderId: string, notes: string) {
+  try {
+    const order = await prisma.order.update({
+      where: { id: orderId },
+      data: {
+        designStatus: "REJECTED",
+        adminDesignNotes: notes
+      }
+    });
+
+    const { sendDesignRejectedEmail } = await import("@/actions/email.action");
+    sendDesignRejectedEmail(order.email, order.orderNumber, notes, order.firstName)
+      .catch(e => console.error("Tasarım ret maili gönderme hatası:", e));
+
+    revalidatePath("/admin/orders");
+    revalidatePath(`/admin/orders/${orderId}`);
+
+    return { success: true, message: "Tasarım reddedildi." };
+  } catch (error: any) {
+    console.error("Reject design error:", error);
+    return { success: false, message: error.message || String(error) };
+  }
+}
+
+export async function approveDesignByUser(orderId: string) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return { success: false, message: "Yetkisiz işlem." };
+    }
+
+    const order = await prisma.order.update({
+      where: { 
+        id: orderId,
+        userId: session.user.id 
+      },
+      data: {
+        designStatus: "APPROVED",
+        userApprovedAt: new Date()
+      }
+    });
+
+    revalidatePath("/profile/orders");
+    revalidatePath(`/profile/orders/${orderId}`);
+
+    return { success: true, message: "Tasarımı başarıyla onayladınız." };
+  } catch (error: any) {
+    console.error("Approve design by user error:", error);
+    return { success: false, message: error.message || String(error) };
+  }
+}

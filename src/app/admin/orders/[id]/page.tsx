@@ -2,6 +2,7 @@ import prisma from "@/lib/prisma";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import OrderStatusUpdater from "./OrderStatusUpdater";
+import DesignApprovalManager from "./DesignApprovalManager";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +19,8 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
   if (!order) {
     notFound();
   }
+
+
 
   const date = new Intl.DateTimeFormat("tr-TR", {
     day: "2-digit",
@@ -74,7 +77,6 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
                         {(item.price).toLocaleString("tr-TR")} TL
                       </span>
                       
-                      {/* Tek resim için geriye dönük uyumluluk veya customImages boş ise */}
                       {item.customImage && (!item.customImages || item.customImages.length === 0) && item.customImage !== "https://via.placeholder.com/800x800.png?text=Musteri+Tasarimi" && (
                         <a 
                           href={item.customImage} 
@@ -88,7 +90,6 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
                         </a>
                       )}
 
-                      {/* Çoklu resimler için */}
                       {item.customImages && item.customImages.length > 0 && (
                         <div className="flex flex-col gap-2 mt-2">
                           {item.customImages.map((imgUrl: string, idx: number) => (
@@ -137,7 +138,12 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
               </div>
             </div>
           </div>
-
+          <DesignApprovalManager order={{
+            id: order.id,
+            designStatus: order.designStatus,
+            adminDesignNotes: order.adminDesignNotes,
+            userApprovedAt: order.userApprovedAt
+          }} />
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
             <h2 className="font-semibold text-gray-900 mb-4">Teslimat Adresi</h2>
             <div className="text-sm text-gray-700 space-y-1">

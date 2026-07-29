@@ -60,24 +60,7 @@ export default async function HomePage() {
         </Link>
       </div>
 
-      {/* Categories Menu */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Kategoriler</h2>
-          <Link href="/urunlerimiz" className="text-orange-500 font-medium hover:underline">Tüm Ürünler &rarr;</Link>
-        </div>
-        <div className="flex overflow-x-auto pb-4 gap-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-          {CATEGORIES.map(category => (
-            <Link 
-              key={category.slug} 
-              href={`/urunlerimiz/${category.slug}`}
-              className="flex-shrink-0 bg-white border border-gray-200 rounded-full px-6 py-3 font-semibold text-gray-700 hover:text-orange-500 hover:border-orange-200 hover:shadow-sm transition-all whitespace-nowrap"
-            >
-              {category.name}
-            </Link>
-          ))}
-        </div>
-      </div>
+
 
       {/* Products Grid */}
       <div id="products" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
