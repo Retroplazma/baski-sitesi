@@ -4,13 +4,18 @@ import { useState, useRef } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { supabase } from "@/lib/supabaseClient";
 
+import ImageCropper from "./ImageCropper";
+
 interface ImageUploaderProps {
   allowMultiple?: boolean;
   onUploadSuccess: (urls: string | string[]) => void;
   onClear: () => void;
+  printWidth?: number | null;
+  printHeight?: number | null;
 }
 
-export default function ImageUploader({ allowMultiple = false, onUploadSuccess, onClear }: ImageUploaderProps) {
+export default function ImageUploader({ allowMultiple = false, onUploadSuccess, onClear, printWidth, printHeight }: ImageUploaderProps) {
+  const [cropData, setCropData] = useState<{ imageSrc: string; file: File } | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<{name: string, url: string, preview: string | null}[]>([]);
@@ -83,10 +88,15 @@ export default function ImageUploader({ allowMultiple = false, onUploadSuccess, 
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      if (allowMultiple) {
-        Array.from(e.target.files).forEach(file => handleFile(file));
+      const file = e.target.files[0];
+      if (printWidth && printHeight && file.type.startsWith("image/")) {
+        setCropData({ imageSrc: URL.createObjectURL(file), file });
       } else {
-        handleFile(e.target.files[0]);
+        if (allowMultiple) {
+          Array.from(e.target.files).forEach(f => handleFile(f));
+        } else {
+          handleFile(file);
+        }
       }
     }
     if (fileInputRef.current) {
@@ -97,10 +107,15 @@ export default function ImageUploader({ allowMultiple = false, onUploadSuccess, 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      if (allowMultiple) {
-        Array.from(e.dataTransfer.files).forEach(file => handleFile(file));
+      const file = e.dataTransfer.files[0];
+      if (printWidth && printHeight && file.type.startsWith("image/")) {
+        setCropData({ imageSrc: URL.createObjectURL(file), file });
       } else {
-        handleFile(e.dataTransfer.files[0]);
+        if (allowMultiple) {
+          Array.from(e.dataTransfer.files).forEach(f => handleFile(f));
+        } else {
+          handleFile(file);
+        }
       }
     }
   };
@@ -126,6 +141,18 @@ export default function ImageUploader({ allowMultiple = false, onUploadSuccess, 
 
   return (
     <div>
+      {cropData && printWidth && printHeight && (
+        <ImageCropper
+          imageSrc={cropData.imageSrc}
+          aspectRatio={printWidth / printHeight}
+          onCropComplete={(croppedBlob) => {
+            const croppedFile = new File([croppedBlob], cropData.file.name, { type: "image/jpeg" });
+            setCropData(null);
+            handleFile(croppedFile);
+          }}
+          onCancel={() => setCropData(null)}
+        />
+      )}
       <h3 className="text-sm font-bold text-gray-900 mb-3">Tasarımınızı Yükleyin</h3>
       
       {error && (
@@ -161,7 +188,7 @@ export default function ImageUploader({ allowMultiple = false, onUploadSuccess, 
                 </button>
               </div>
               {file.preview && file.preview !== '/placeholder.svg' && (
-                <div className="relative rounded-md overflow-hidden bg-white border border-gray-200 flex justify-center items-center h-24">
+                <div className="relative rounded-md overflow-hidden bg-white border border-gray-200 flex justify-center items-center h-24 group">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={file.preview} alt="Preview" className="object-contain w-full h-full" />
                 </div>
@@ -208,7 +235,7 @@ export default function ImageUploader({ allowMultiple = false, onUploadSuccess, 
             </button>
           </div>
           {uploadedFiles[0].preview && uploadedFiles[0].preview !== '/placeholder.svg' && (
-            <div className="relative rounded-md overflow-hidden bg-white border border-gray-200 flex justify-center items-center h-48">
+            <div className="relative rounded-md overflow-hidden bg-white border border-gray-200 flex justify-center items-center h-48 group">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={uploadedFiles[0].preview} alt="Preview" className="object-contain w-full h-full" />
             </div>

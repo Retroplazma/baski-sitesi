@@ -45,6 +45,9 @@ model Product {
   quantityOptions Json?
   options         Json?       @default("[]")
 
+  printWidth      Float?
+  printHeight     Float?
+
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
 }

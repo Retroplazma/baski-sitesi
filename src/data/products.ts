@@ -26,6 +26,8 @@ export interface Product {
   quantityOptions?: QuantityOption[];
   options?: { title: string; choices: { name: string; priceModifier: number }[] }[];
   allowMultipleDesigns?: boolean;
+  printWidth?: number | null;
+  printHeight?: number | null;
 }
 
 export const CATEGORIES: Category[] = [

@@ -23,6 +23,8 @@ const productSchema = z.object({
   allowMultipleDesigns: z.boolean(),
   isNew: z.boolean().optional(),
   isPopular: z.boolean().optional(),
+  printWidth: z.number().nullable().optional(),
+  printHeight: z.number().nullable().optional(),
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -54,6 +56,8 @@ export default function ProductForm({
       allowMultipleDesigns: product?.allowMultipleDesigns ?? false,
       isNew: product?.isNew ?? false,
       isPopular: product?.isPopular ?? false,
+      printWidth: product?.printWidth ?? null,
+      printHeight: product?.printHeight ?? null,
     }
   });
 
@@ -188,6 +192,36 @@ export default function ProductForm({
                     <span className="text-sm font-medium text-gray-700">Popüler Ürün Olarak İşaretle</span>
                   </label>
                 </div>
+              </div>
+
+              {/* Kırpma ve Baskı Boyutları (Opsiyonel) */}
+              <div className="md:col-span-2 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <h3 className="block text-sm font-bold text-gray-900 mb-3">Kırpma ve Baskı Boyutları (Opsiyonel)</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Genişlik (Birim)</label>
+                    <input 
+                      type="number" 
+                      step="any"
+                      {...register("printWidth", { setValueAs: v => v === "" ? null : parseFloat(v) })} 
+                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition-all" 
+                      placeholder="Örn: 3" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Yükseklik (Birim)</label>
+                    <input 
+                      type="number" 
+                      step="any"
+                      {...register("printHeight", { setValueAs: v => v === "" ? null : parseFloat(v) })} 
+                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition-all" 
+                      placeholder="Örn: 4" 
+                    />
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500 mt-2">
+                  * Genişlik ve Yükseklik girilirse, kullanıcı resim yüklerken bu en/boy oranında (aspect ratio) kırpma işlemine zorlanır. Boş bırakılırsa kırpma özelliği devreye girmez.
+                </p>
               </div>
 
               {/* Dinamik Seçenekler (Varyantlar) Alanı */}

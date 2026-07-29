@@ -16,6 +16,8 @@ export function mapPrismaProductToStatic(dbProduct: any): Product {
     quantityOptions: dbProduct.quantityOptions || undefined,
     options: dbProduct.options || undefined,
     allowMultipleDesigns: dbProduct.allowMultipleDesigns || false,
+    printWidth: dbProduct.printWidth || null,
+    printHeight: dbProduct.printHeight || null,
   };
 }
 

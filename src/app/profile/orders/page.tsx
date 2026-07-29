@@ -18,6 +18,15 @@ function OrderDesignApproval({ order, onApproved }: { order: any, onApproved: ()
     );
   }
 
+  if (order.designStatus === "PENDING") {
+    return (
+      <div className="bg-blue-50 px-4 py-3 border-t border-blue-200 text-blue-800 text-sm font-medium flex items-center gap-2">
+        <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+        Siparişiniz onay için inceleniyor, inceleme sonrasında buradan onaylama yapabilirsiniz.
+      </div>
+    );
+  }
+
   if (order.designStatus !== "WAITING_USER_APPROVAL") return null;
 
   const handleApprove = async () => {

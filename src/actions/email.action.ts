@@ -19,8 +19,11 @@ export async function sendOrderConfirmationEmail(
           <p style="margin: 0;"><strong>Sipariş Numarası:</strong> ${orderNumber}</p>
           <p style="margin: 10px 0 0;"><strong>Toplam Tutar:</strong> ${totalAmount.toLocaleString("tr-TR", { style: "currency", currency: "TRY" })}</p>
         </div>
+        <div style="background-color: #e0f2fe; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #0ea5e9;">
+          <p style="margin: 0; color: #0369a1;"><strong>Önemli Bilgilendirme:</strong> Siparişinizdeki tasarımlar ekibimiz tarafından incelenecek ve baskıya uygunluğu kontrol edilecektir. İnceleme tamamlandığında <strong>onayınıza</strong> sunulacaktır. Üretime geçilmesi için daha sonra size gelecek bildirimle birlikte "Siparişlerim" sayfasından tasarım onayını vermeniz gerekmektedir.</p>
+        </div>
         
-        <p>Ürünleriniz en kısa sürede kargoya verilecektir. Bizi tercih ettiğiniz için teşekkür ederiz.</p>
+        <p>Bizi tercih ettiğiniz için teşekkür ederiz.</p>
         <p style="margin-top: 30px; font-size: 0.9em; color: #666;">Baskı Atölyesi Ekibi</p>
       </div>
     `;

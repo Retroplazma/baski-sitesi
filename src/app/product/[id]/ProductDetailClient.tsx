@@ -278,6 +278,8 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
             allowMultiple={product.allowMultipleDesigns}
             onUploadSuccess={(urls) => setUploadedUrls(Array.isArray(urls) ? urls : [urls])} 
             onClear={() => setUploadedUrls([])} 
+            printWidth={product.printWidth}
+            printHeight={product.printHeight}
           />
 
         </div>

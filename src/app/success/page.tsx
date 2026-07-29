@@ -22,11 +22,18 @@ function SuccessContent() {
       </p>
       
       {orderNumber && (
-        <div className="bg-gray-50 p-4 rounded-lg mb-8 inline-block border border-gray-200">
+        <div className="bg-gray-50 p-4 rounded-lg mb-6 inline-block border border-gray-200">
           <span className="text-gray-500 block text-sm font-semibold mb-1">Sipariş Numarası</span>
           <span className="text-2xl font-black text-gray-800">{orderNumber}</span>
         </div>
       )}
+
+      <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-8 text-left rounded-r-lg mx-auto">
+        <h3 className="text-blue-800 font-bold mb-1">Önemli Bilgilendirme</h3>
+        <p className="text-sm text-blue-700 leading-relaxed">
+          Siparişinizdeki tasarımlar ekibimiz tarafından incelenecek ve baskıya uygunluğu kontrol edilecektir. İnceleme tamamlandığında <strong>onayınıza sunulacaktır</strong>. Üretime geçilmesi için "Siparişlerim" sayfasından onay vermeniz gerekmektedir.
+        </p>
+      </div>
       
       <div>
         <Link href="/" className="inline-block px-8 py-4 bg-[#00008F] hover:bg-blue-800 text-white font-bold rounded-lg transition-colors shadow-md text-lg">

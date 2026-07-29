@@ -22,9 +22,12 @@ export default async function SuccessPage({ params }: { params: Promise<{ orderI
             <p className="text-lg font-mono font-bold text-blue-600">{orderId}</p>
           </div>
           
-          <p className="text-sm text-gray-600 mb-8 leading-relaxed px-2">
-            Siparişinizle ilgili detaylar ve güncel durum bilgileri sisteme kaydedildi. Bizi tercih ettiğiniz için teşekkür ederiz.
-          </p>
+          <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-8 text-left rounded-r-lg">
+            <h3 className="text-blue-800 font-bold mb-1">Önemli Bilgilendirme</h3>
+            <p className="text-sm text-blue-700 leading-relaxed">
+              Siparişinizdeki tasarımlar ekibimiz tarafından incelenecek ve baskıya uygunluğu kontrol edilecektir. İnceleme tamamlandığında <strong>onayınıza sunulacaktır</strong>. Üretime geçilmesi için "Siparişlerim" sayfasından onay vermeniz gerekmektedir.
+            </p>
+          </div>
 
           <Link
             href="/"
