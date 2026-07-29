@@ -73,7 +73,9 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
       price: totalPrice,
       quantity: selectedQuantity,
       customImage: uploadedUrl,
-      variants: selectedVariants
+      variants: selectedVariants,
+      basePrice: product.basePrice,
+      quantityOptions: product.quantityOptions
     });
 
     setLoading(false);

@@ -2,12 +2,13 @@
 
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { sendOrderConfirmationEmail, sendOrderShippedEmail } from "@/actions/email.action";
 import { revalidatePath } from "next/cache";
 
 export async function createOrder(customerData: any, cartItems: any[], totalAmount: number) {
   try {
-    const session = await getServerSession();
+    const session = await getServerSession(authOptions);
     const userId = session?.user?.id;
     
     const orderNumber = `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;

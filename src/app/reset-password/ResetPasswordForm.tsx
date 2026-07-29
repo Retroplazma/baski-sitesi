@@ -40,7 +40,7 @@ export default function ResetPasswordForm() {
     if (res.success) {
       setSuccess(true);
       setTimeout(() => {
-        router.push("/login");
+        router.push("/");
       }, 3000);
     } else {
       setError(res.message);
