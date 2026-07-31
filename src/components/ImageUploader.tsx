@@ -19,6 +19,7 @@ export default function ImageUploader({ allowMultiple = false, onUploadSuccess, 
   const [cropData, setCropData] = useState<{ imageSrc: string; file: File } | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isCopyrightAccepted, setIsCopyrightAccepted] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<{name: string, url: string, preview: string | null}[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -107,6 +108,11 @@ export default function ImageUploader({ allowMultiple = false, onUploadSuccess, 
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
+    if (!isCopyrightAccepted) {
+      setError("Lütfen telif hakkı beyanını onaylayın.");
+      return;
+    }
+    
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       const file = e.dataTransfer.files[0];
       if (printWidth && printHeight && file.type.startsWith("image/")) {
@@ -157,7 +163,24 @@ export default function ImageUploader({ allowMultiple = false, onUploadSuccess, 
           onCancel={() => setCropData(null)}
         />
       )}
+      
       <h3 className="text-sm font-bold text-gray-900 mb-3">Tasarımınızı Yükleyin</h3>
+      
+      <div className="mb-4 flex items-start gap-2 bg-gray-50 p-3 rounded-lg border border-gray-200">
+        <input 
+          type="checkbox" 
+          id="copyright-accept-uploader"
+          checked={isCopyrightAccepted}
+          onChange={(e) => {
+            setIsCopyrightAccepted(e.target.checked);
+            if (e.target.checked && error === "Lütfen telif hakkı beyanını onaylayın.") setError(null);
+          }}
+          className="mt-1 w-4 h-4 rounded border-gray-300 text-sky-500 focus:ring-sky-500"
+        />
+        <label htmlFor="copyright-accept-uploader" className="text-xs text-gray-600 leading-relaxed cursor-pointer select-none">
+          Yüklediğim dosyaların telif hakkının bana ait olduğunu veya telif sahibinden gerekli baskı/çoğaltma izinlerini aldığımı beyan ve kabul ederim.
+        </label>
+      </div>
       
       {error && (
         <div className="mb-3 text-sm text-red-500 bg-red-50 p-2 rounded-md border border-red-100">
@@ -202,7 +225,13 @@ export default function ImageUploader({ allowMultiple = false, onUploadSuccess, 
 
           {(!uploadedFiles.length || allowMultiple) && (
             <div
-              onClick={() => fileInputRef.current?.click()}
+              onClick={() => {
+                if (!isCopyrightAccepted) {
+                  setError("Lütfen telif hakkı beyanını onaylayın.");
+                  return;
+                }
+                fileInputRef.current?.click();
+              }}
               onDrop={handleDrop}
               onDragOver={handleDragOver}
               className="flex flex-col justify-center items-center border-2 border-dashed border-gray-300 rounded-lg p-10 text-center bg-gray-50 hover:bg-sky-50 hover:border-sky-400 transition-colors cursor-pointer group"

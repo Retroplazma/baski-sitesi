@@ -11,6 +11,7 @@ export default function ImpositionPreview() {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isCopyrightAccepted, setIsCopyrightAccepted] = useState(false);
 
   const addToCart = useCartStore(state => state.addToCart);
   const openCart = useCartStore(state => state.openCart);
@@ -284,6 +285,10 @@ export default function ImpositionPreview() {
   };
 
   const handleCheckout = async () => {
+    if (!isCopyrightAccepted) {
+      setError("Lütfen telif hakkı beyanını onaylayın.");
+      return;
+    }
     setIsGenerating(true);
     setError(null);
 
@@ -366,7 +371,11 @@ export default function ImpositionPreview() {
           <button
             onClick={handleCheckout}
             disabled={isGenerating}
-            className="px-6 py-2 bg-green-600 text-white font-bold rounded-lg shadow-sm hover:bg-green-700 transition-colors flex items-center gap-2 disabled:opacity-50"
+            className={`px-6 py-2 font-bold rounded-lg shadow-sm transition-colors flex items-center gap-2 ${
+              isCopyrightAccepted && !isGenerating
+                ? "bg-green-600 text-white hover:bg-green-700" 
+                : "bg-gray-400 text-gray-100 cursor-not-allowed opacity-80"
+            }`}
           >
             {isGenerating ? 'İşleniyor...' : (
               <>
@@ -376,6 +385,22 @@ export default function ImpositionPreview() {
             )}
           </button>
         </div>
+      </div>
+
+      <div className="mb-6 flex items-start gap-3 bg-gray-50 p-4 rounded-xl border border-gray-200">
+        <input 
+          type="checkbox" 
+          id="copyright-accept"
+          checked={isCopyrightAccepted}
+          onChange={(e) => {
+            setIsCopyrightAccepted(e.target.checked);
+            if (e.target.checked && error === "Lütfen telif hakkı beyanını onaylayın.") setError(null);
+          }}
+          className="mt-1 w-5 h-5 rounded border-gray-300 text-green-600 focus:ring-green-600"
+        />
+        <label htmlFor="copyright-accept" className="text-sm text-gray-600 leading-relaxed cursor-pointer select-none">
+          Yüklediğim dosyaların telif hakkının bana ait olduğunu veya telif sahibinden gerekli baskı/çoğaltma izinlerini aldığımı, doğabilecek her türlü hukuki ve cezai sorumluluğun tarafıma ait olduğunu beyan ve kabul ederim.
+        </label>
       </div>
 
       {error && (

@@ -30,6 +30,14 @@ export default function MesafeliSatisPage() {
       <p className="mb-4">
         İşbu sözleşmeye konu olan ürünler <strong>ALICI'nın istekleri veya kişisel ihtiyaçları doğrultusunda özel olarak üretildiği (özel baskı, ebatlama, isim yazımı vb.)</strong> için Tüketicinin Korunması Hakkında Kanun gereği <strong>CAYMA HAKKI KULLANILAMAZ.</strong> Üretim veya kargo kaynaklı (hatalı baskı, yırtılma vb.) durumlarda ürün birebir değiştirilir veya iade alınır.
       </p>
+
+      <h2 className="text-xl font-semibold text-gray-800 mt-8 mb-4">Madde 5 - Fikri ve Sınai Mülkiyet Hakları ve İçerik Sorumluluğu</h2>
+      <ol className="list-decimal pl-5 mb-4 space-y-2">
+        <li><strong>İçeriklerin Mülkiyeti ve İzin Beyanı:</strong> ALICI, siteye yüklediği, gönderdiği veya basılmasını talep ettiği her türlü tasarım, logo, fotoğraf, çizim, metin ve kutu oyunu materyalinin ("İçerik") yasal sahibi olduğunu veya FSEK ve SMK kapsamında eser/marka sahibinden gerekli tüm çoğaltma, işleme ve yayma izinlerini yazılı olarak aldığını beyan ve taahhüt eder.</li>
+        <li><strong>Münhasır Sorumluluk ve Rücu Hakkı:</strong> Yüklenen İçerik'in üçüncü kişilerin telif, marka veya patent haklarını ihlal etmesi durumunda doğacak her türlü hukuki, cezai ve mali sorumluluk münhasıran ALICI'ya aittir. SATICI'nın uğrayacağı her türlü zarar (tazminat, idari para cezası, avukatlık ücreti), SATICI'nın ilk talebinde ALICI tarafından nakden ve defaten ödenecektir.</li>
+        <li><strong>Siparişi Reddetme ve İptal Hakkı:</strong> SATICI; yasaya, genel ahlaka aykırı bulduğu veya üçüncü kişilerin fikri haklarını ihlal ettiğinden şüphe duyduğu (bilindik marka logoları, lisanslı kutu oyunları vb.) siparişleri dilediği zaman reddetme, basım işlemini durdurma ve sözleşmeyi feshetme hakkını saklı tutar.</li>
+        <li><strong>Yasal Makamlarla Bilgi Paylaşımı:</strong> Telif hakkı ihlali şüphesi veya yasal talep halinde SATICI, ALICI'ya ait IP adresi, kimlik ve yüklenen dosyaları adli/idari mercilerle paylaşma hakkına sahiptir.</li>
+      </ol>
     </div>
   );
 }

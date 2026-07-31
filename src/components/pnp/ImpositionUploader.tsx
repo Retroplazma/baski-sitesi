@@ -1,7 +1,7 @@
 "use client";
 
 import { usePnpImpositionStore } from "@/store/usePnpImpositionStore";
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 
 export default function ImpositionUploader() {
   const { 
@@ -14,8 +14,15 @@ export default function ImpositionUploader() {
     globalBackMode,
     setGlobalBackMode,
     globalBackPreview,
-    setGlobalBackFile
+    setGlobalBackFile,
+    setCards
   } = usePnpImpositionStore();
+
+  const [isSplitterOpen, setIsSplitterOpen] = useState(false);
+  const [splitCols, setSplitCols] = useState(1);
+  const [splitRows, setSplitRows] = useState(1);
+  const [isSplitting, setIsSplitting] = useState(false);
+  const [splitFile, setSplitFile] = useState<File | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const globalBackInputRef = useRef<HTMLInputElement>(null);
@@ -53,9 +60,168 @@ export default function ImpositionUploader() {
     }
   };
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setSplitFile(e.target.files[0]);
+    } else {
+      setSplitFile(null);
+    }
+  };
+
+  const handleSplitAction = async () => {
+    if (!splitFile) {
+      alert("Lütfen önce bir görsel (Sprite Sheet) yükleyin.");
+      return;
+    }
+    
+    if (splitCols < 1 || splitRows < 1) {
+      alert("Satır ve sütun sayısı en az 1 olmalıdır.");
+      return;
+    }
+    
+    setIsSplitting(true);
+    try {
+      const objectUrl = URL.createObjectURL(splitFile);
+      const img = new Image();
+      
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+        img.src = objectUrl;
+      });
+
+      const cardWidth = img.width / splitCols;
+      const cardHeight = img.height / splitRows;
+      const newCards: any[] = [];
+
+      const canvas = document.createElement('canvas');
+      canvas.width = cardWidth;
+      canvas.height = cardHeight;
+      const ctx = canvas.getContext('2d');
+      
+      if (!ctx) throw new Error("Canvas context oluşturulamadı");
+
+      for (let r = 0; r < splitRows; r++) {
+        for (let c = 0; c < splitCols; c++) {
+          ctx.clearRect(0, 0, cardWidth, cardHeight);
+          ctx.drawImage(
+            img,
+            c * cardWidth, r * cardHeight, cardWidth, cardHeight,
+            0, 0, cardWidth, cardHeight
+          );
+
+          const blob = await new Promise<Blob | null>(res => canvas.toBlob(res, 'image/png'));
+          if (blob) {
+            const splitFile = new File([blob], `split_${r}_${c}.png`, { type: 'image/png' });
+            const previewUrl = URL.createObjectURL(splitFile);
+            
+            newCards.push({
+              id: `card-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+              frontFile: splitFile,
+              backFile: null,
+              count: 1,
+              frontPreview: previewUrl
+            });
+          }
+        }
+      }
+      
+      setCards([...cards, ...newCards]);
+      
+      alert(`${newCards.length} adet kart başarıyla bölündü ve eklendi!`);
+      setIsSplitterOpen(false);
+      setSplitFile(null); // Reset selection after success
+      
+    } catch (error) {
+      console.error("Görsel bölünürken hata oluştu:", error);
+      alert("Görsel bölünürken bir hata oluştu.");
+    } finally {
+      setIsSplitting(false);
+    }
+  };
+
   return (
     <div className="p-6 md:p-8 space-y-8">
       
+      {/* Görsel Bölme (Toplu Yükleme) Aracı */}
+      <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm mb-8">
+        <button 
+          onClick={() => setIsSplitterOpen(!isSplitterOpen)}
+          className="w-full px-6 py-4 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <div className="bg-indigo-100 text-indigo-600 p-2 rounded-lg">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-gray-900 text-left">Görseli Bölerek Ekle (Toplu Yükleme)</h2>
+              <p className="text-sm text-gray-500">Tek bir görsel içinde dizili birden fazla kartı otomatik parçalayın.</p>
+            </div>
+          </div>
+          <svg className={`w-5 h-5 text-gray-400 transform transition-transform ${isSplitterOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+        </button>
+
+        {isSplitterOpen && (
+          <div className="p-6 border-t border-gray-100 bg-white">
+            <div className="grid md:grid-cols-2 gap-6 items-end">
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Görsel (Sprite Sheet) Yükle</label>
+                <input 
+                  type="file" 
+                  accept="image/*"
+                  onChange={handleFileSelect}
+                  disabled={isSplitting}
+                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 disabled:opacity-50"
+                  id="split-upload"
+                />
+              </div>
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Sütun Sayısı (Cols)</label>
+                  <input 
+                    type="number" 
+                    min="1" 
+                    value={splitCols} 
+                    onChange={(e) => setSplitCols(parseInt(e.target.value) || 1)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Satır Sayısı (Rows)</label>
+                  <input 
+                    type="number" 
+                    min="1" 
+                    value={splitRows} 
+                    onChange={(e) => setSplitRows(parseInt(e.target.value) || 1)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                  />
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-6">
+              <button
+                onClick={handleSplitAction}
+                disabled={isSplitting || !splitFile}
+                className="w-full py-3 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {isSplitting ? (
+                  <>
+                    <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    Görsel parçalanıyor, lütfen bekleyin...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                    Görseli Parçala ve Kartlara Ekle
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Çift Yönlü ise Arka Plan Modu Seçimi */}
       {pageSettings.printType === 'double' && (
         <div className="bg-orange-50 border border-orange-200 p-6 rounded-2xl mb-8">
@@ -193,6 +359,21 @@ export default function ImpositionUploader() {
                       >
                         {card.backPreview ? 'Arka Yüz Yüklendi (Değiştir)' : '+ Özel Arka Yüz Yükle'}
                       </label>
+                    </div>
+                  )}
+
+                  {/* Ortak Arka Plan Seç Butonu (Double & GlobalBack) */}
+                  {pageSettings.printType === 'double' && globalBackMode && (
+                    <div className="mt-auto">
+                      <button 
+                        onClick={() => {
+                          setGlobalBackFile(card.frontFile, card.frontPreview);
+                          alert("Arka plan başarıyla ayarlandı!");
+                        }}
+                        className="w-full text-xs py-1.5 px-2 bg-orange-100 text-orange-700 font-semibold rounded border border-orange-200 hover:bg-orange-200 transition-colors"
+                      >
+                        Bunu Ortak Arka Yüz Yap
+                      </button>
                     </div>
                   )}
                 </div>

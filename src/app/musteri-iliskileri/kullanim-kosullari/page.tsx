@@ -26,6 +26,14 @@ export default function KullanimKosullariPage() {
       <p className="mb-4">
         Teknik bakım, sunucu arızaları veya mücbir sebeplerden ötürü sitenin geçici olarak hizmet dışı kalması durumunda Baskı Atölyesi herhangi bir sorumluluk kabul etmez.
       </p>
+
+      <h2 className="text-xl font-semibold text-gray-800 mt-8 mb-4">5. Fikri ve Sınai Mülkiyet Hakları ve İçerik Sorumluluğu</h2>
+      <ol className="list-decimal pl-5 mb-4 space-y-2">
+        <li><strong>İçeriklerin Mülkiyeti ve İzin Beyanı:</strong> Kullanıcı, siteye yüklediği, gönderdiği veya basılmasını talep ettiği her türlü tasarım, logo, fotoğraf, çizim, metin ve kutu oyunu materyalinin ("İçerik") yasal sahibi olduğunu veya FSEK ve SMK kapsamında eser/marka sahibinden gerekli tüm çoğaltma, işleme ve yayma izinlerini yazılı olarak aldığını beyan ve taahhüt eder.</li>
+        <li><strong>Münhasır Sorumluluk ve Rücu Hakkı:</strong> Yüklenen İçerik'in üçüncü kişilerin telif, marka veya patent haklarını ihlal etmesi durumunda doğacak her türlü hukuki, cezai ve mali sorumluluk münhasıran Kullanıcı'ya aittir. Baskı Atölyesi'nin uğrayacağı her türlü zarar (tazminat, idari para cezası, avukatlık ücreti), ilk talebinde Kullanıcı tarafından nakden ve defaten ödenecektir.</li>
+        <li><strong>Siparişi Reddetme ve İptal Hakkı:</strong> Baskı Atölyesi; yasaya, genel ahlaka aykırı bulduğu veya üçüncü kişilerin fikri haklarını ihlal ettiğinden şüphe duyduğu (bilindik marka logoları, lisanslı kutu oyunları vb.) siparişleri dilediği zaman reddetme, basım işlemini durdurma ve sözleşmeyi feshetme hakkını saklı tutar.</li>
+        <li><strong>Yasal Makamlarla Bilgi Paylaşımı:</strong> Telif hakkı ihlali şüphesi veya yasal talep halinde Baskı Atölyesi, Kullanıcı'ya ait IP adresi, kimlik ve yüklenen dosyaları adli/idari mercilerle paylaşma hakkına sahiptir.</li>
+      </ol>
     </div>
   );
 }
