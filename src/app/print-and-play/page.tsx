@@ -35,6 +35,47 @@ export default function PrintAndPlayPage() {
           </div>
         </div>
 
+        {/* Imposition Banner (Otomatik Dizgi Motoru) */}
+        <div className="mb-12">
+          <Link href="/print-and-play/imposition" className="group relative block bg-slate-900 rounded-3xl overflow-hidden shadow-2xl hover:shadow-orange-500/20 transition-all duration-300">
+            {/* Background elements */}
+            <div className="absolute inset-0 bg-gradient-to-r from-orange-500 via-purple-500 to-indigo-600 opacity-20 group-hover:opacity-30 transition-opacity"></div>
+            <div className="absolute -right-20 -top-20 w-64 h-64 bg-orange-500 rounded-full blur-3xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
+            <div className="absolute -left-20 -bottom-20 w-64 h-64 bg-indigo-500 rounded-full blur-3xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
+
+            <div className="relative p-8 md:p-10 flex flex-col md:flex-row items-center gap-8 z-10">
+              <div className="shrink-0 relative">
+                <div className="absolute inset-0 bg-white blur-xl opacity-20 rounded-full"></div>
+                <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md p-4 rounded-2xl border border-white/20">
+                  <svg className="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                  </svg>
+                </div>
+              </div>
+              
+              <div className="flex-1 text-center md:text-left">
+                <div className="inline-flex items-center gap-1.5 bg-gradient-to-r from-orange-400 to-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full mb-3 uppercase tracking-wider shadow-sm">
+                  <span className="animate-pulse w-2 h-2 bg-white rounded-full"></span>
+                  YENİ ÖZELLİK
+                </div>
+                <h2 className="text-3xl font-extrabold text-white mb-3">
+                  Otomatik Dizgi Motoru (Imposition)
+                </h2>
+                <p className="text-slate-300 text-lg max-w-2xl leading-relaxed">
+                  Görsellerinizi yükleyin, kros çizgilerinizi ve sayfa boyutunu seçin. Gelişmiş PDF motorumuz kartlarınızı matbaaya tam uyumlu şekilde saniyeler içinde dizsin!
+                </p>
+              </div>
+
+              <div className="shrink-0 mt-4 md:mt-0">
+                <div className="inline-flex items-center justify-center bg-white text-slate-900 font-bold px-8 py-4 rounded-xl hover:bg-orange-50 hover:text-orange-600 hover:scale-105 transition-all shadow-lg group-hover:shadow-orange-500/25">
+                  Hemen Başla 
+                  <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                </div>
+              </div>
+            </div>
+          </Link>
+        </div>
+
         {/* Action Buttons */}
         <div className="grid md:grid-cols-2 gap-8">
           {/* Baskı Flow */}

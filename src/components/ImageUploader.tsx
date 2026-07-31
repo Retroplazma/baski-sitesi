@@ -12,9 +12,10 @@ interface ImageUploaderProps {
   onClear: () => void;
   printWidth?: number | null;
   printHeight?: number | null;
+  bleed?: number | null;
 }
 
-export default function ImageUploader({ allowMultiple = false, onUploadSuccess, onClear, printWidth, printHeight }: ImageUploaderProps) {
+export default function ImageUploader({ allowMultiple = false, onUploadSuccess, onClear, printWidth, printHeight, bleed }: ImageUploaderProps) {
   const [cropData, setCropData] = useState<{ imageSrc: string; file: File } | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -145,6 +146,9 @@ export default function ImageUploader({ allowMultiple = false, onUploadSuccess, 
         <ImageCropper
           imageSrc={cropData.imageSrc}
           aspectRatio={printWidth / printHeight}
+          printWidth={printWidth}
+          printHeight={printHeight}
+          bleed={bleed || 0}
           onCropComplete={(croppedBlob) => {
             const croppedFile = new File([croppedBlob], cropData.file.name, { type: "image/jpeg" });
             setCropData(null);

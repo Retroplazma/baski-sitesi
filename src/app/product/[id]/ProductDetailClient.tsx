@@ -280,6 +280,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
             onClear={() => setUploadedUrls([])} 
             printWidth={product.printWidth}
             printHeight={product.printHeight}
+            bleed={product.bleed}
           />
 
         </div>

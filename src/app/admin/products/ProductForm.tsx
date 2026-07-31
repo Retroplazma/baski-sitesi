@@ -25,6 +25,7 @@ const productSchema = z.object({
   isPopular: z.boolean().optional(),
   printWidth: z.number().nullable().optional(),
   printHeight: z.number().nullable().optional(),
+  bleed: z.number().nullable().optional(),
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -58,6 +59,7 @@ export default function ProductForm({
       isPopular: product?.isPopular ?? false,
       printWidth: product?.printWidth ?? null,
       printHeight: product?.printHeight ?? null,
+      bleed: product?.bleed ?? null,
     }
   });
 
@@ -197,30 +199,40 @@ export default function ProductForm({
               {/* Kırpma ve Baskı Boyutları (Opsiyonel) */}
               <div className="md:col-span-2 p-4 bg-gray-50 rounded-lg border border-gray-200">
                 <h3 className="block text-sm font-bold text-gray-900 mb-3">Kırpma ve Baskı Boyutları (Opsiyonel)</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Genişlik (Birim)</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Genişlik (mm)</label>
                     <input 
                       type="number" 
                       step="any"
                       {...register("printWidth", { setValueAs: v => v === "" ? null : parseFloat(v) })} 
                       className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition-all" 
-                      placeholder="Örn: 3" 
+                      placeholder="Örn: 210" 
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Yükseklik (Birim)</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Yükseklik (mm)</label>
                     <input 
                       type="number" 
                       step="any"
                       {...register("printHeight", { setValueAs: v => v === "" ? null : parseFloat(v) })} 
                       className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition-all" 
-                      placeholder="Örn: 4" 
+                      placeholder="Örn: 297" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Taşma Payı / Bleed (mm)</label>
+                    <input 
+                      type="number" 
+                      step="any"
+                      {...register("bleed", { setValueAs: v => v === "" ? null : parseFloat(v) })} 
+                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition-all" 
+                      placeholder="Örn: 3" 
                     />
                   </div>
                 </div>
                 <p className="text-xs text-gray-500 mt-2">
-                  * Genişlik ve Yükseklik girilirse, kullanıcı resim yüklerken bu en/boy oranında (aspect ratio) kırpma işlemine zorlanır. Boş bırakılırsa kırpma özelliği devreye girmez.
+                  * Genişlik ve Yükseklik girilirse, kullanıcı resim yüklerken bu en/boy oranında (aspect ratio) kırpma işlemine zorlanır. Boş bırakılırsa kırpma özelliği devreye girmez. Taşma payı, güvenli alanı hesaplamak için kullanılır.
                 </p>
               </div>
 

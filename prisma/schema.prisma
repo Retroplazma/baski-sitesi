@@ -47,6 +47,7 @@ model Product {
 
   printWidth      Float?
   printHeight     Float?
+  bleed           Float?      @default(3)
 
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt

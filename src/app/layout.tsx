@@ -29,8 +29,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="tr">
-      <body className={`${inter.className} bg-gray-50 text-gray-800 flex flex-col min-h-screen`}>
+    <html lang="tr" suppressHydrationWarning>
+      <body className={`${inter.className} bg-gray-50 text-gray-800 flex flex-col min-h-screen`} suppressHydrationWarning>
         <AuthProvider>
           {/* Header */}
           <header className="bg-white shadow-sm relative z-50">
