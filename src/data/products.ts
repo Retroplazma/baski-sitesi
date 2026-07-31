@@ -28,6 +28,7 @@ export interface Product {
   allowMultipleDesigns?: boolean;
   printWidth?: number | null;
   printHeight?: number | null;
+  bleed?: number | null;
 }
 
 export const CATEGORIES: Category[] = [
