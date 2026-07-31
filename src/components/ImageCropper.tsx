@@ -10,6 +10,10 @@ interface ImageCropperProps {
   printWidth?: number | null;
   printHeight?: number | null;
   bleed?: number;
+  wrapConfig?: {
+    pos: string;
+    ratio: number;
+  };
   onCropComplete: (croppedBlob: Blob) => void;
   onCancel: () => void;
 }
@@ -32,6 +36,7 @@ export default function ImageCropper({
   printWidth, 
   printHeight, 
   bleed = 0,
+  wrapConfig,
   onCropComplete, 
   onCancel 
 }: ImageCropperProps) {
@@ -120,23 +125,94 @@ export default function ImageCropper({
   const safeZoneX = (printWidth && bleed) ? (bleed / (printWidth + bleed * 2)) * 100 : 5;
   const safeZoneY = (printHeight && bleed) ? (bleed / (printHeight + bleed * 2)) * 100 : 5;
 
-  return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-      <style>{`
-        .custom-crop-area {
-          border: 1px solid rgba(255, 255, 255, 0.5) !important;
-        }
+  let customStyles = '';
+  let warningBox = null;
+
+  if (wrapConfig) {
+    if (wrapConfig.pos !== 'center') {
+      const percentage = wrapConfig.ratio * 100;
+      let wrapCss = '';
+      if (wrapConfig.pos === 'top') {
+        wrapCss = `top: 0; left: 0; right: 0; height: ${percentage}%; border-bottom: 2px dashed #ef4444; background-color: rgba(239, 68, 68, 0.2);`;
+      } else if (wrapConfig.pos === 'bottom') {
+        wrapCss = `bottom: 0; left: 0; right: 0; height: ${percentage}%; border-top: 2px dashed #ef4444; background-color: rgba(239, 68, 68, 0.2);`;
+      } else if (wrapConfig.pos === 'left') {
+        wrapCss = `top: 0; bottom: 0; left: 0; width: ${percentage}%; border-right: 2px dashed #ef4444; background-color: rgba(239, 68, 68, 0.2);`;
+      } else if (wrapConfig.pos === 'right') {
+        wrapCss = `top: 0; bottom: 0; right: 0; width: ${percentage}%; border-left: 2px dashed #ef4444; background-color: rgba(239, 68, 68, 0.2);`;
+      }
+
+      customStyles = `
+        .custom-crop-area { border: 1px solid rgba(255, 255, 255, 0.5) !important; }
         .custom-crop-area::after {
           content: '';
           position: absolute;
-          top: ${safeZoneY}%;
-          left: ${safeZoneX}%;
-          right: ${safeZoneX}%;
-          bottom: ${safeZoneY}%;
-          border: 2px dashed #ef4444;
+          ${wrapCss}
           pointer-events: none;
         }
-      `}</style>
+        .custom-crop-area::before {
+          content: 'Kıvrılacak Pay';
+          position: absolute;
+          color: #ef4444;
+          font-size: 10px;
+          font-weight: bold;
+          z-index: 10;
+          white-space: nowrap;
+          ${wrapConfig.pos === 'top' ? 'top: 4px; left: 50%; transform: translateX(-50%);' : 
+            wrapConfig.pos === 'bottom' ? 'bottom: 4px; left: 50%; transform: translateX(-50%);' : 
+            wrapConfig.pos === 'left' ? 'left: 4px; top: 4px;' : 
+            'right: 4px; top: 4px;'}
+        }
+      `;
+
+      warningBox = (
+        <div className="bg-amber-50 border-b border-amber-200 p-4 flex items-start gap-3">
+          <AlertTriangle className="w-6 h-6 text-amber-500 flex-shrink-0 mt-0.5" />
+          <div className="text-sm text-amber-900">
+            <strong className="font-bold block mb-1">Katlama Payına Dikkat Edin</strong>
+            Kırmızı taralı alan kutunun içine doğru kıvrılacak kısımdır. Ana tasarımınızın (yazılar ve logolar) kırmızı alanın dışında kaldığından emin olun, ancak arkaplan renginiz veya dokunuz kıvrılma alanını da kaplamalıdır.
+          </div>
+        </div>
+      );
+    } else {
+      customStyles = `.custom-crop-area { border: 1px solid rgba(255, 255, 255, 0.5) !important; }`;
+      warningBox = (
+        <div className="bg-sky-50 border-b border-sky-200 p-4 flex items-start gap-3">
+          <AlertTriangle className="w-6 h-6 text-sky-500 flex-shrink-0 mt-0.5" />
+          <div className="text-sm text-sky-900">
+            Kutunun ana (merkez) görselini kırpıyorsunuz. Yan kenarlara taşacak alanları yan panellere ayrıca yükleyebilirsiniz.
+          </div>
+        </div>
+      );
+    }
+  } else {
+    customStyles = `
+      .custom-crop-area { border: 1px solid rgba(255, 255, 255, 0.5) !important; }
+      .custom-crop-area::after {
+        content: '';
+        position: absolute;
+        top: ${safeZoneY}%;
+        left: ${safeZoneX}%;
+        right: ${safeZoneX}%;
+        bottom: ${safeZoneY}%;
+        border: 2px dashed #ef4444;
+        pointer-events: none;
+      }
+    `;
+    warningBox = (
+        <div className="bg-amber-50 border-b border-amber-200 p-4 flex items-start gap-3">
+          <AlertTriangle className="w-6 h-6 text-amber-500 flex-shrink-0 mt-0.5" />
+          <div className="text-sm text-amber-900">
+            <strong className="font-bold block mb-1">Tasarımınızı Kesim Çizgilerine Göre Ayarlayın</strong>
+            Dış çerçeve ile kırmızı kesik çizgi arasındaki alan <strong>Taşma Payıdır</strong> ve baskı sonrası kesilerek atılacaktır. Önemli yazı ve logolarınızın kırmızı kesik çizginin (Güvenli Alan) içinde kaldığından, ancak arka plan renginizin en dış çerçeveye kadar taştığından emin olun.
+          </div>
+        </div>
+    );
+  }
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+      <style>{customStyles}</style>
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl flex flex-col overflow-hidden max-h-screen">
         <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
           <h2 className="text-lg font-bold text-gray-900">Resmi Kırp ve Düzenle</h2>
@@ -147,13 +223,7 @@ export default function ImageCropper({
           </button>
         </div>
         
-        <div className="bg-amber-50 border-b border-amber-200 p-4 flex items-start gap-3">
-          <AlertTriangle className="w-6 h-6 text-amber-500 flex-shrink-0 mt-0.5" />
-          <div className="text-sm text-amber-900">
-            <strong className="font-bold block mb-1">Tasarımınızı Kesim Çizgilerine Göre Ayarlayın</strong>
-            Dış çerçeve ile kırmızı kesik çizgi arasındaki alan <strong>Taşma Payıdır</strong> ve baskı sonrası kesilerek atılacaktır. Önemli yazı ve logolarınızın kırmızı kesik çizginin (Güvenli Alan) içinde kaldığından, ancak arka plan renginizin en dış çerçeveye kadar taştığından emin olun.
-          </div>
-        </div>
+        {warningBox}
 
         <div className="relative w-full h-[50vh] bg-gray-900">
           <Cropper

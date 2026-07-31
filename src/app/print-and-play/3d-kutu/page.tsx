@@ -110,6 +110,17 @@ export default function PnpQuotePage() {
           <p className="text-gray-600">Projenizi detaylandırın ve dosyalarınızı yükleyin, size en uygun fiyat teklifiyle geri dönelim.</p>
         </div>
 
+        {/* Kutu Kaplama Yönlendirmesi */}
+        <div className="mb-8 bg-indigo-50 border border-indigo-100 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div>
+            <h3 className="text-lg font-bold text-indigo-900">Kendi Kutu Kaplamanızı mı (Sticker) Tasarlamak İstiyorsunuz?</h3>
+            <p className="text-sm text-indigo-700 mt-1">Özel kutunuz için kaplama/sticker tasarımınızı yapın, ölçülerinizi girip baskı tabakanızı (33x48 cm) anında hazırlayın ve sepete ekleyin.</p>
+          </div>
+          <Link href="/print-and-play/kutu-kaplama" className="shrink-0 px-6 py-3 bg-indigo-600 text-white font-bold text-sm rounded-xl shadow-md hover:bg-indigo-700 transition-colors">
+            Kutu Kaplama Aracına Git
+          </Link>
+        </div>
+
         <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
           
           {/* Uploader */}
